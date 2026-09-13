@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FluxGuard — Contacto</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="login-page">
+
+  <div class="login-background"></div>
+
+  <a href="/" class="login-back register-back-fixed">
+    <i class="bi bi-arrow-left"></i> VOLVER AL INICIO
+  </a>
+
+  <div class="login-wrapper register-wrapper">
+    <!-- INTRO IZQUIERDA -->
+    <section class="login-intro">
+      <a class="login-brand login-brand-logo" href="/" aria-label="FluxGuard - Inicio">
+        <img src="/assets/fluxguard-logo-full.png" alt="FluxGuard">
+      </a>
+
+      <span class="section-eyebrow">
+        <span></span> CONOCE FLUXGUARD
+      </span>
+
+      <h1>
+        Hablemos de<br>
+        <span>tu proyecto.</span>
+      </h1>
+
+      <p>
+        Déjanos tus datos y cuéntanos qué necesitas. Nuestro equipo podrá ponerse en contacto contigo para brindarte más información sobre FluxGuard.
+      </p>
+
+      <div class="login-status">
+        <span class="status-dot"></span> SOLICITUD DE INFORMACIÓN
+      </div>
+    </section>
+
+    <!-- FORMULARIO DERECHA -->
+    <section class="login-card register-card">
+      <div class="login-card-header">
+        <div class="login-lock">
+          <i class="bi bi-person-fill fs-4"></i>
+        </div>
+        <div>
+          <span class="login-card-label">CONTACTO</span>
+          <h2>Conoce FluxGuard</h2>
+        </div>
+      </div>
+
+      <p class="login-description">
+        Completa el siguiente formulario y nos pondremos en contacto contigo.
+      </p>
+
+      <div id="prospect-alert" class="d-none"></div>
+
+      <form id="prospect-form">
+        <!-- DATOS DE CONTACTO -->
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <i class="bi bi-person text-secondary"></i>
+          <h3 class="h6 text-white text-uppercase font-condensed mb-0" style="letter-spacing:0.1em;">Datos de contacto</h3>
+        </div>
+
+        <div class="login-fields-two mb-3">
+          <div class="login-field mt-0">
+            <label for="prospect-nombre">Nombre *</label>
+            <div class="login-input-wrapper">
+              <input id="prospect-nombre" type="text" placeholder="Tu nombre" required>
+            </div>
+          </div>
+          <div class="login-field mt-0">
+            <label for="prospect-apellido">Apellido *</label>
+            <div class="login-input-wrapper">
+              <input id="prospect-apellido" type="text" placeholder="Tu apellido" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="login-field">
+          <label for="prospect-correo">Correo electrónico *</label>
+          <div class="login-input-wrapper">
+            <input id="prospect-correo" type="email" placeholder="correo@empresa.com" required>
+          </div>
+        </div>
+
+        <div class="login-field">
+          <label for="prospect-telefono">Teléfono *</label>
+          <div class="login-input-wrapper">
+            <input id="prospect-telefono" type="tel" placeholder="55 1234 5678" required>
+          </div>
+        </div>
+
+        <!-- DATOS DE LA EMPRESA -->
+        <div class="d-flex align-items-center gap-2 mt-4 mb-3">
+          <i class="bi bi-building text-secondary"></i>
+          <h3 class="h6 text-white text-uppercase font-condensed mb-0" style="letter-spacing:0.1em;">Datos de la empresa</h3>
+        </div>
+
+        <div class="login-field mt-0">
+          <label for="prospect-empresa">Empresa / institución</label>
+          <div class="login-input-wrapper">
+            <input id="prospect-empresa" type="text" placeholder="Nombre de la empresa o institución">
+          </div>
+        </div>
+
+        <div class="login-field">
+          <label for="prospect-cargo">Cargo</label>
+          <div class="login-input-wrapper">
+            <input id="prospect-cargo" type="text" placeholder="Ej. Director, Ingeniero, Gerente...">
+          </div>
+        </div>
+
+        <div class="login-field">
+          <label for="prospect-sector">Sector</label>
+          <div class="login-input-wrapper">
+            <select id="prospect-sector">
+              <option value="">Selecciona un sector</option>
+              <option value="Energia">Energía</option>
+              <option value="Industria">Industria</option>
+              <option value="Tecnologia">Tecnología</option>
+              <option value="Gobierno">Gobierno</option>
+              <option value="Educacion">Educación</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- INTERÉS -->
+        <div class="d-flex align-items-center gap-2 mt-4 mb-3">
+          <i class="bi bi-chat-left-text text-secondary"></i>
+          <h3 class="h6 text-white text-uppercase font-condensed mb-0" style="letter-spacing:0.1em;">Interés en FluxGuard</h3>
+        </div>
+
+        <div class="login-field mt-0">
+          <label for="prospect-interes">¿Qué te interesa de FluxGuard?</label>
+          <div class="login-input-wrapper">
+            <select id="prospect-interes">
+              <option value="">Selecciona una opción</option>
+              <option value="Monitoreo">Monitoreo de redes eléctricas</option>
+              <option value="Analisis">Análisis de datos</option>
+              <option value="Alertas">Detección de anomalías</option>
+              <option value="Plataforma">Conocer la plataforma</option>
+              <option value="Implementacion">Implementación empresarial</option>
+              <option value="Prototipo">Solicitud de Prototipo</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="login-field">
+          <label for="prospect-mensaje">Mensaje</label>
+          <div class="login-input-wrapper">
+            <textarea id="prospect-mensaje" rows="4" placeholder="Cuéntanos brevemente qué necesitas..."></textarea>
+          </div>
+        </div>
+
+        <!-- CONSENTIMIENTO -->
+        <label class="remember-me mt-4 d-flex align-items-center gap-2" style="cursor:pointer;">
+          <input type="checkbox" id="prospect-acepta" required>
+          <span style="font-size:12px; color:#888;">
+            Acepto que FluxGuard utilice mis datos para ponerse en contacto conmigo.
+          </span>
+        </label>
+
+        <button type="submit" id="btn-submit-prospect" class="login-submit d-flex justify-content-between align-items-center">
+          <span>Quiero conocer FluxGuard</span>
+          <i class="bi bi-send-fill"></i>
+        </button>
+      </form>
+
+      <div class="d-flex align-items-center gap-2 mt-4 text-secondary small">
+        <i class="bi bi-shield-check" style="color:var(--gold);"></i>
+        <span>Tus datos serán guardados de forma segura en MongoDB Atlas.</span>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

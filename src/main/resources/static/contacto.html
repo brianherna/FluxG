@@ -15,174 +15,198 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/styles.css">
 </head>
-<body class="login-page">
+<body class="login-page premium-login" style="padding-top: 64px;">
+
+  <!-- ================= NAVBAR ================= -->
+  <header class="navbar">
+    <a href="/#inicio" class="navbar-logo" aria-label="FluxGuard - Inicio">
+      <img src="/assets/fluxguard-logo-full.png" class="navbar-logo-image" alt="FluxGuard">
+    </a>
+
+    <nav class="navbar-links" id="navbarMenu">
+      <a href="/#inicio">Inicio</a>
+      <a href="/#quienes-somos">Equipo</a>
+      <a href="/#como-funciona">Cómo funciona</a>
+      <a href="/#servicios">Servicios</a>
+      <a href="/#tecnologia">Tecnología</a>
+      <a href="/#plataforma">Plataforma</a>
+      <a href="/#ubicacion">Ubicación</a>
+      <a href="/planes.html">Planes</a>
+      <a href="/contacto.html" style="color:#fff;">Contacto</a>
+    </nav>
+
+    <div class="navbar-actions" id="navbar-auth-action">
+      <a href="/login.html" class="navbar-panel">
+        Iniciar sesión <i class="bi bi-arrow-up-right"></i>
+      </a>
+    </div>
+
+    <button type="button" class="navbar-mobile-toggle" id="navbarToggle" aria-label="Abrir menú">
+      <i class="bi bi-list fs-4"></i>
+    </button>
+  </header>
 
   <div class="login-background"></div>
 
-  <a href="/" class="login-back register-back-fixed">
-    <i class="bi bi-arrow-left"></i> VOLVER AL INICIO
-  </a>
-
-  <div class="login-wrapper register-wrapper">
+  <div class="login-wrapper premium-login-wrapper" style="max-width: 1220px; margin: 0 auto; padding: 50px 24px 90px; grid-template-columns: minmax(320px, 0.85fr) minmax(440px, 1.15fr); gap: 60px; place-items: start center;">
     <!-- INTRO IZQUIERDA -->
-    <section class="login-intro">
-      <a class="login-brand login-brand-logo" href="/" aria-label="FluxGuard - Inicio">
+    <section class="login-intro premium-intro" style="padding-top: 20px;">
+      <a class="login-brand login-brand-logo mb-4" href="/" aria-label="FluxGuard - Inicio">
         <img src="/assets/fluxguard-logo-full.png" alt="FluxGuard">
       </a>
 
       <span class="section-eyebrow">
-        <span></span> CONOCE FLUXGUARD
+        <span></span> FLUXGUARD / PROYECTOS & ASESORÍA
       </span>
 
-      <h1>
+      <h1 style="font-size: clamp(52px, 6vw, 84px); margin: 18px 0 16px;">
         Hablemos de<br>
-        <span>tu proyecto.</span>
+        <em>tu proyecto.</em>
       </h1>
 
-      <p>
-        Déjanos tus datos y cuéntanos qué necesitas. Nuestro equipo podrá ponerse en contacto contigo para brindarte más información sobre FluxGuard.
+      <p style="font-size: 15px; color: #b8b2c6; line-height: 1.75; max-width: 480px;">
+        Cuéntanos qué necesitas para tu instalación o infraestructura. Nuestro equipo técnico analizará tu caso para ofrecerte la mejor solución de monitoreo inteligente, demostración de la plataforma o coordinación de prototipo piloto.
       </p>
 
-      <div class="login-status">
-        <span class="status-dot"></span> SOLICITUD DE INFORMACIÓN
+      <div class="login-feature-list" style="margin-top: 36px;">
+        <div><b>01</b><span>Asesoría directa con ingenieros de IoT</span></div>
+        <div><b>02</b><span>Evaluación de factibilidad y cobertura</span></div>
+        <div><b>03</b><span>Presupuestos y prototipos a medida</span></div>
       </div>
     </section>
 
     <!-- FORMULARIO DERECHA -->
-    <section class="login-card register-card">
-      <div class="login-card-header">
-        <div class="login-lock">
-          <i class="bi bi-person-fill fs-4"></i>
-        </div>
-        <div>
-          <span class="login-card-label">CONTACTO</span>
-          <h2>Conoce FluxGuard</h2>
-        </div>
+    <section class="login-card premium-login-card" style="width: 100%; padding: 36px 32px;">
+      <div class="premium-card-top">
+        <span>PROSPECCIÓN Y CONTACTO</span>
+        <span>01 / 01</span>
       </div>
 
-      <p class="login-description">
-        Completa el siguiente formulario y nos pondremos en contacto contigo.
+      <div class="login-lock">
+        <i class="bi bi-chat-dots-fill fs-4" style="color:var(--gold);"></i>
+      </div>
+
+      <h2 style="font-family:'Barlow Condensed',sans-serif; font-size: 38px; text-transform:uppercase; margin: 0 0 6px;">
+        Háblanos de tu proyecto
+      </h2>
+      <p class="login-description" style="color:#a8a2b5; margin-bottom: 22px;">
+        Completa el formulario y un especialista de FluxGuard se pondrá en contacto contigo a la brevedad.
       </p>
 
-      <div id="prospect-alert" class="d-none"></div>
+      <div id="prospect-alert" class="d-none mb-3"></div>
 
       <form id="prospect-form">
-        <!-- DATOS DE CONTACTO -->
-        <div class="d-flex align-items-center gap-2 mb-3">
-          <i class="bi bi-person text-secondary"></i>
-          <h3 class="h6 text-white text-uppercase font-condensed mb-0" style="letter-spacing:0.1em;">Datos de contacto</h3>
+        <!-- 1. DATOS DE CONTACTO -->
+        <div style="font-size: 11px; font-weight: 800; color: var(--gold); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <i class="bi bi-person-lines-fill"></i> 1. Datos personales
         </div>
 
-        <div class="login-fields-two mb-3">
+        <div class="login-fields-two mb-3" style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
           <div class="login-field mt-0">
-            <label for="prospect-nombre">Nombre *</label>
+            <label for="prospect-nombre" style="font-size: 10px; font-weight: 800; letter-spacing: 0.1em; color: #a8a2b5; text-transform: uppercase; margin-bottom: 6px; display: block;">Nombre *</label>
             <div class="login-input-wrapper">
-              <input id="prospect-nombre" type="text" placeholder="Tu nombre" required>
+              <input id="prospect-nombre" type="text" placeholder="Tu nombre" required style="width:100%; padding: 12px 14px; background: rgba(14,10,24,0.9); border: 1px solid rgba(185,167,255,0.2); border-radius: 4px; color: #fff; outline: none; font-size: 13px;">
             </div>
           </div>
           <div class="login-field mt-0">
-            <label for="prospect-apellido">Apellido *</label>
+            <label for="prospect-apellido" style="font-size: 10px; font-weight: 800; letter-spacing: 0.1em; color: #a8a2b5; text-transform: uppercase; margin-bottom: 6px; display: block;">Apellido *</label>
             <div class="login-input-wrapper">
-              <input id="prospect-apellido" type="text" placeholder="Tu apellido" required>
+              <input id="prospect-apellido" type="text" placeholder="Tu apellido" required style="width:100%; padding: 12px 14px; background: rgba(14,10,24,0.9); border: 1px solid rgba(185,167,255,0.2); border-radius: 4px; color: #fff; outline: none; font-size: 13px;">
             </div>
           </div>
         </div>
 
-        <div class="login-field">
-          <label for="prospect-correo">Correo electrónico *</label>
-          <div class="login-input-wrapper">
-            <input id="prospect-correo" type="email" placeholder="correo@empresa.com" required>
+        <div class="login-fields-two mb-3" style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="login-field mt-0">
+            <label for="prospect-correo" style="font-size: 10px; font-weight: 800; letter-spacing: 0.1em; color: #a8a2b5; text-transform: uppercase; margin-bottom: 6px; display: block;">Correo electrónico *</label>
+            <div class="login-input-wrapper">
+              <input id="prospect-correo" type="email" placeholder="correo@empresa.com" required style="width:100%; padding: 12px 14px; background: rgba(14,10,24,0.9); border: 1px solid rgba(185,167,255,0.2); border-radius: 4px; color: #fff; outline: none; font-size: 13px;">
+            </div>
+          </div>
+          <div class="login-field mt-0">
+            <label for="prospect-telefono" style="font-size: 10px; font-weight: 800; letter-spacing: 0.1em; color: #a8a2b5; text-transform: uppercase; margin-bottom: 6px; display: block;">Teléfono *</label>
+            <div class="login-input-wrapper">
+              <input id="prospect-telefono" type="tel" placeholder="55 1234 5678" required style="width:100%; padding: 12px 14px; background: rgba(14,10,24,0.9); border: 1px solid rgba(185,167,255,0.2); border-radius: 4px; color: #fff; outline: none; font-size: 13px;">
+            </div>
           </div>
         </div>
 
-        <div class="login-field">
-          <label for="prospect-telefono">Teléfono *</label>
-          <div class="login-input-wrapper">
-            <input id="prospect-telefono" type="tel" placeholder="55 1234 5678" required>
+        <!-- 2. ORGANIZACIÓN Y REQUERIMIENTO -->
+        <div style="font-size: 11px; font-weight: 800; color: var(--gold); letter-spacing: 0.12em; text-transform: uppercase; margin: 20px 0 12px; display: flex; align-items: center; gap: 8px;">
+          <i class="bi bi-building"></i> 2. Organización y requerimiento
+        </div>
+
+        <div class="login-fields-two mb-3" style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="login-field mt-0">
+            <label for="prospect-empresa" style="font-size: 10px; font-weight: 800; letter-spacing: 0.1em; color: #a8a2b5; text-transform: uppercase; margin-bottom: 6px; display: block;">Empresa / Institución</label>
+            <div class="login-input-wrapper">
+              <input id="prospect-empresa" type="text" placeholder="Nombre de empresa o institución" style="width:100%; padding: 12px 14px; background: rgba(14,10,24,0.9); border: 1px solid rgba(185,167,255,0.2); border-radius: 4px; color: #fff; outline: none; font-size: 13px;">
+            </div>
+          </div>
+          <div class="login-field mt-0">
+            <label for="prospect-cargo" style="font-size: 10px; font-weight: 800; letter-spacing: 0.1em; color: #a8a2b5; text-transform: uppercase; margin-bottom: 6px; display: block;">Cargo</label>
+            <div class="login-input-wrapper">
+              <input id="prospect-cargo" type="text" placeholder="Ej. Director, Ingeniero, Gerente..." style="width:100%; padding: 12px 14px; background: rgba(14,10,24,0.9); border: 1px solid rgba(185,167,255,0.2); border-radius: 4px; color: #fff; outline: none; font-size: 13px;">
+            </div>
           </div>
         </div>
 
-        <!-- DATOS DE LA EMPRESA -->
-        <div class="d-flex align-items-center gap-2 mt-4 mb-3">
-          <i class="bi bi-building text-secondary"></i>
-          <h3 class="h6 text-white text-uppercase font-condensed mb-0" style="letter-spacing:0.1em;">Datos de la empresa</h3>
-        </div>
-
-        <div class="login-field mt-0">
-          <label for="prospect-empresa">Empresa / institución</label>
-          <div class="login-input-wrapper">
-            <input id="prospect-empresa" type="text" placeholder="Nombre de la empresa o institución">
+        <div class="login-fields-two mb-3" style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="login-field mt-0">
+            <label for="prospect-sector" style="font-size: 10px; font-weight: 800; letter-spacing: 0.1em; color: #a8a2b5; text-transform: uppercase; margin-bottom: 6px; display: block;">Sector</label>
+            <div class="login-input-wrapper">
+              <select id="prospect-sector" style="width:100%; padding: 12px 14px; background: #130e23; border: 1px solid rgba(185,167,255,0.2); border-radius: 4px; color: #fff; outline: none; font-size: 13px;">
+                <option value="">Selecciona un sector</option>
+                <option value="Energia">Energía</option>
+                <option value="Industria">Industria y Manufactura</option>
+                <option value="Tecnologia">Tecnología & IoT</option>
+                <option value="Gobierno">Gobierno / Infraestructura Pública</option>
+                <option value="Educacion">Educación / Investigación</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+          </div>
+          <div class="login-field mt-0">
+            <label for="prospect-interes" style="font-size: 10px; font-weight: 800; letter-spacing: 0.1em; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; display: block;">Interés principal *</label>
+            <div class="login-input-wrapper">
+              <select id="prospect-interes" style="width:100%; padding: 12px 14px; background: #130e23; border: 1px solid rgba(185,167,255,0.4); border-radius: 4px; color: #fff; outline: none; font-size: 13px;">
+                <option value="Prototipo">Solicitud de Prototipo Piloto</option>
+                <option value="Monitoreo">Monitoreo de redes eléctricas</option>
+                <option value="Analisis">Análisis y exportación de datos</option>
+                <option value="Alertas">Detección de anomalías en tiempo real</option>
+                <option value="Plataforma">Demostración de la plataforma web</option>
+                <option value="Implementacion">Implementación a escala empresarial</option>
+                <option value="Otro">Otro requerimiento</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        <div class="login-field">
-          <label for="prospect-cargo">Cargo</label>
+        <!-- 3. MENSAJE -->
+        <div class="login-field mb-3" style="margin-top: 16px;">
+          <label for="prospect-mensaje" style="font-size: 10px; font-weight: 800; letter-spacing: 0.1em; color: #a8a2b5; text-transform: uppercase; margin-bottom: 6px; display: block;">Cuéntanos sobre tu proyecto o instalación</label>
           <div class="login-input-wrapper">
-            <input id="prospect-cargo" type="text" placeholder="Ej. Director, Ingeniero, Gerente...">
-          </div>
-        </div>
-
-        <div class="login-field">
-          <label for="prospect-sector">Sector</label>
-          <div class="login-input-wrapper">
-            <select id="prospect-sector">
-              <option value="">Selecciona un sector</option>
-              <option value="Energia">Energía</option>
-              <option value="Industria">Industria</option>
-              <option value="Tecnologia">Tecnología</option>
-              <option value="Gobierno">Gobierno</option>
-              <option value="Educacion">Educación</option>
-              <option value="Otro">Otro</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- INTERÉS -->
-        <div class="d-flex align-items-center gap-2 mt-4 mb-3">
-          <i class="bi bi-chat-left-text text-secondary"></i>
-          <h3 class="h6 text-white text-uppercase font-condensed mb-0" style="letter-spacing:0.1em;">Interés en FluxGuard</h3>
-        </div>
-
-        <div class="login-field mt-0">
-          <label for="prospect-interes">¿Qué te interesa de FluxGuard?</label>
-          <div class="login-input-wrapper">
-            <select id="prospect-interes">
-              <option value="">Selecciona una opción</option>
-              <option value="Monitoreo">Monitoreo de redes eléctricas</option>
-              <option value="Analisis">Análisis de datos</option>
-              <option value="Alertas">Detección de anomalías</option>
-              <option value="Plataforma">Conocer la plataforma</option>
-              <option value="Implementacion">Implementación empresarial</option>
-              <option value="Prototipo">Solicitud de Prototipo</option>
-              <option value="Otro">Otro</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="login-field">
-          <label for="prospect-mensaje">Mensaje</label>
-          <div class="login-input-wrapper">
-            <textarea id="prospect-mensaje" rows="4" placeholder="Cuéntanos brevemente qué necesitas..."></textarea>
+            <textarea id="prospect-mensaje" rows="3" placeholder="Describe brevemente tus puntos de medición, dudas técnicas o alcance deseado..." style="width:100%; padding: 12px 14px; background: rgba(14,10,24,0.9); border: 1px solid rgba(185,167,255,0.2); border-radius: 4px; color: #fff; outline: none; font-size: 13px; resize: vertical;"></textarea>
           </div>
         </div>
 
         <!-- CONSENTIMIENTO -->
-        <label class="remember-me mt-4 d-flex align-items-center gap-2" style="cursor:pointer;">
-          <input type="checkbox" id="prospect-acepta" required>
-          <span style="font-size:12px; color:#888;">
+        <label class="d-flex align-items-center gap-2 mt-3 mb-4" style="cursor:pointer;">
+          <input type="checkbox" id="prospect-acepta" required style="accent-color: var(--gold); width: 16px; height: 16px;">
+          <span style="font-size: 12px; color: #b8b2c6;">
             Acepto que FluxGuard utilice mis datos para ponerse en contacto conmigo.
           </span>
         </label>
 
-        <button type="submit" id="btn-submit-prospect" class="login-submit d-flex justify-content-between align-items-center">
-          <span>Quiero conocer FluxGuard</span>
+        <button type="submit" id="btn-submit-prospect" class="login-submit premium-submit" style="width:100%; padding: 14px; background: var(--gold); color: #0b0815; font-weight: 900; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; border: none; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; transition: 0.25s;">
+          <span>ENVIAR SOLICITUD</span>
           <i class="bi bi-send-fill"></i>
         </button>
       </form>
 
-      <div class="d-flex align-items-center gap-2 mt-4 text-secondary small">
-        <i class="bi bi-shield-check" style="color:var(--gold);"></i>
-        <span>Tus datos serán guardados de forma segura en MongoDB Atlas.</span>
+      <div class="d-flex align-items-center gap-2 mt-4 text-secondary" style="font-size: 11px;">
+        <i class="bi bi-shield-check" style="color:var(--gold); font-size: 16px;"></i>
+        <span>Tus datos se guardan y gestionan de forma segura en MongoDB Atlas (colección <code>prospectos</code>).</span>
       </div>
     </section>
   </div>

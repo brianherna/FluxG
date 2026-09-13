@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initMap();
   initContactForm();
   initAuthForms();
+  initPlanes();
 });
 
 function initNavbar() {
@@ -207,67 +208,256 @@ function initMap() {
 function initContactForm() {
   const form = document.getElementById("prospect-form");
   if (!form) return;
-  const alertBox = document.getElementById("prospect-alert"); const button = document.getElementById("btn-submit-prospect");
+
+  // Precargar datos si el usuario ya inició sesión
+  const rawUser = localStorage.getItem("usuario");
+  if (rawUser) {
+    try {
+      const u = JSON.parse(rawUser);
+      const nom = document.getElementById("prospect-nombre");
+      const ape = document.getElementById("prospect-apellido");
+      const mail = document.getElementById("prospect-correo");
+      if (nom && !nom.value && u.nombre) nom.value = u.nombre;
+      if (ape && !ape.value && u.apellido) ape.value = u.apellido;
+      if (mail && !mail.value && u.correo) mail.value = u.correo;
+    } catch (_) {}
+  }
+
+  // Preseleccionar interés si viene en la URL (?interes=Prototipo o ?plan=standard)
+  const params = new URLSearchParams(window.location.search);
+  const interesParam = params.get("interes");
+  const planParam = params.get("plan");
+  const selectInteres = document.getElementById("prospect-interes");
+  if (selectInteres) {
+    if (interesParam) {
+      selectInteres.value = interesParam;
+    } else if (planParam) {
+      selectInteres.value = planParam.toLowerCase() === "prototipo" ? "Prototipo" : "Implementacion";
+    }
+  }
+
+  const alertBox = document.getElementById("prospect-alert");
+  const button = document.getElementById("btn-submit-prospect");
+
   form.addEventListener("submit", async event => {
     event.preventDefault();
-    if (!document.getElementById("prospect-acepta")?.checked) return showAlert(alertBox, "danger", "Debes aceptar el uso de tus datos para continuar.");
+    if (!document.getElementById("prospect-acepta")?.checked) {
+      return showAlert(alertBox, "danger", "Debes aceptar el uso de tus datos de contacto para continuar.");
+    }
     const value = id => document.getElementById(id)?.value.trim() || "";
-    const payload = { nombre:value("prospect-nombre"), apellido:value("prospect-apellido"), correo:value("prospect-correo"), telefono:value("prospect-telefono"), empresa:value("prospect-empresa"), cargo:value("prospect-cargo"), sector:document.getElementById("prospect-sector")?.value || "", interes:document.getElementById("prospect-interes")?.value || "", mensaje:value("prospect-mensaje") };
-    if (button) { button.disabled = true; button.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> ENVIANDO...`; }
+    const payload = {
+      nombre: value("prospect-nombre"),
+      apellido: value("prospect-apellido"),
+      correo: value("prospect-correo"),
+      telefono: value("prospect-telefono"),
+      empresa: value("prospect-empresa"),
+      cargo: value("prospect-cargo"),
+      sector: document.getElementById("prospect-sector")?.value || "",
+      interes: document.getElementById("prospect-interes")?.value || "",
+      mensaje: value("prospect-mensaje")
+    };
+
+    if (button) {
+      button.disabled = true;
+      button.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> ENVIANDO...`;
+    }
+
     try {
-      const response = await fetch("/api/prospectos", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload) });
-      const data = await response.json(); if (!response.ok || !data.success) throw new Error(data.message || "No se pudo registrar la información.");
-      showAlert(alertBox, "success", data.message || "Información registrada correctamente en MongoDB Atlas."); form.reset();
-    } catch (error) { showAlert(alertBox, "danger", error.message || "No se pudo conectar con el servidor."); }
-    finally { if (button) { button.disabled = false; button.innerHTML = `Quiero conocer FluxGuard <i class="bi bi-send-fill ms-2"></i>`; } }
+      const response = await fetch("/api/prospectos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "No se pudo registrar la información.");
+      }
+      showAlert(alertBox, "success", data.message || "¡Gracias! Tu información fue registrada y enviada exitosamente a MongoDB Atlas.");
+      form.reset();
+      // Restaurar datos de sesión si existen
+      if (rawUser) {
+        try {
+          const u = JSON.parse(rawUser);
+          if (document.getElementById("prospect-nombre")) document.getElementById("prospect-nombre").value = u.nombre || "";
+          if (document.getElementById("prospect-apellido")) document.getElementById("prospect-apellido").value = u.apellido || "";
+          if (document.getElementById("prospect-correo")) document.getElementById("prospect-correo").value = u.correo || "";
+        } catch (_) {}
+      }
+    } catch (error) {
+      showAlert(alertBox, "danger", error.message || "No se pudo conectar con el servidor.");
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.innerHTML = `<span>ENVIAR SOLICITUD</span> <i class="bi bi-send-fill ms-2"></i>`;
+      }
+    }
   });
 }
 
 function initAuthForms() {
+  const params = new URLSearchParams(window.location.search);
+  const solicitar = params.get("solicitar");
+  const redirect = params.get("redirect");
+
+  // LOGIN FORM
   const loginForm = document.getElementById("login-form");
   if (loginForm) {
-    const alertBox = document.getElementById("login-alert"); const button = document.getElementById("btn-login-submit");
-    if (new URLSearchParams(location.search).get("creada") === "1") showAlert(alertBox, "success", "Cuenta creada correctamente. Ahora inicia sesión.");
+    const alertBox = document.getElementById("login-alert");
+    const button = document.getElementById("btn-login-submit");
+
+    if (params.get("creada") === "1") {
+      showAlert(alertBox, "success", "Cuenta creada exitosamente en MongoDB. Ahora inicia sesión.");
+    }
+
+    if (solicitar === "prototipo") {
+      showAlert(alertBox, "info", "<strong>Solicitud de Prototipo:</strong> Inicia sesión con tu cuenta para continuar con tu solicitud. ¿No tienes cuenta? <a href='/crear-cuenta.html?solicitar=prototipo' class='text-white text-decoration-underline fw-bold'>Crea tu cuenta aquí</a>.");
+      const createLink = document.querySelector(".login-register a[href*='crear-cuenta']");
+      if (createLink) createLink.href = "/crear-cuenta.html?solicitar=prototipo" + (redirect ? `&redirect=${encodeURIComponent(redirect)}` : "");
+    } else if (solicitar === "plan") {
+      showAlert(alertBox, "info", "<strong>Suscripción de Plan:</strong> Inicia sesión con tu cuenta para continuar. ¿No tienes cuenta? <a href='/crear-cuenta.html?solicitar=plan' class='text-white text-decoration-underline fw-bold'>Crea tu cuenta aquí</a>.");
+      const createLink = document.querySelector(".login-register a[href*='crear-cuenta']");
+      if (createLink) createLink.href = "/crear-cuenta.html?solicitar=plan" + (redirect ? `&redirect=${encodeURIComponent(redirect)}` : "");
+    }
+
     loginForm.addEventListener("submit", async event => {
-      event.preventDefault(); const email = document.getElementById("login-email")?.value.trim() || ""; const password = document.getElementById("login-password")?.value || "";
-      if (button) { button.disabled = true; button.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> VERIFICANDO...`; }
+      event.preventDefault();
+      const email = document.getElementById("login-email")?.value.trim() || "";
+      const password = document.getElementById("login-password")?.value || "";
+
+      if (button) {
+        button.disabled = true;
+        button.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> VERIFICANDO...`;
+      }
+
       try {
-        const response = await fetch("/api/auth/login", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({email,password}) });
-        const data = await response.json(); if (!response.ok || !data.success) throw new Error(data.message || "Correo o contraseña incorrectos.");
-        localStorage.setItem("usuario", JSON.stringify(data.usuario)); location.href = "/";
-      } catch (error) { showAlert(alertBox, "danger", error.message || "No se pudo conectar con el servidor."); }
-      finally { if (button) { button.disabled = false; button.innerHTML = `ENTRAR A FLUXGUARD <i class="bi bi-arrow-up-right ms-2"></i>`; } }
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Correo o contraseña incorrectos.");
+        }
+        localStorage.setItem("usuario", JSON.stringify(data.usuario));
+
+        if (solicitar === "prototipo") {
+          window.location.href = "/contacto.html?interes=Prototipo";
+        } else if (redirect) {
+          window.location.href = decodeURIComponent(redirect);
+        } else {
+          window.location.href = "/";
+        }
+      } catch (error) {
+        showAlert(alertBox, "danger", error.message || "No se pudo conectar con el servidor.");
+      } finally {
+        if (button) {
+          button.disabled = false;
+          button.innerHTML = `ENTRAR A FLUXGUARD <i class="bi bi-arrow-up-right ms-2"></i>`;
+        }
+      }
     });
   }
+
+  // REGISTRO FORM
   const registerForm = document.getElementById("create-account-form");
   if (registerForm) {
-    const alertBox = document.getElementById("register-alert"); const button = document.getElementById("btn-register-submit");
+    const alertBox = document.getElementById("register-alert");
+    const button = document.getElementById("btn-register-submit");
+
+    if (solicitar === "prototipo") {
+      showAlert(alertBox, "info", "<strong>Solicitud de Prototipo:</strong> Crea tu cuenta gratuita para continuar con tu solicitud de prototipo de FluxGuard.");
+      const loginLink = document.querySelector(".login-register a[href*='login']");
+      if (loginLink) loginLink.href = "/login.html?solicitar=prototipo" + (redirect ? `&redirect=${encodeURIComponent(redirect)}` : "");
+    }
+
     registerForm.addEventListener("submit", async event => {
-      event.preventDefault(); const get = id => document.getElementById(id)?.value.trim() || ""; const password = document.getElementById("reg-password")?.value || ""; const confirm = document.getElementById("reg-confirm")?.value || "";
+      event.preventDefault();
+      const get = id => document.getElementById(id)?.value.trim() || "";
+      const password = document.getElementById("reg-password")?.value || "";
+      const confirm = document.getElementById("reg-confirm")?.value || "";
+
       if (password !== confirm) return showAlert(alertBox, "danger", "Las contraseñas no coinciden.");
       if (password.length < 8) return showAlert(alertBox, "danger", "La contraseña debe tener al menos 8 caracteres.");
-      if (button) { button.disabled = true; button.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> CREANDO CUENTA...`; }
+
+      if (button) {
+        button.disabled = true;
+        button.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> CREANDO CUENTA...`;
+      }
+
       try {
-        const response = await fetch("/api/auth/register", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({nombre:get("reg-nombre"),apellido:get("reg-apellido"),email:get("reg-email"),password}) });
-        const data = await response.json(); if (!response.ok || !data.success) throw new Error(data.message || "No se pudo crear la cuenta."); location.href = "/login.html?creada=1";
-      } catch (error) { showAlert(alertBox, "danger", error.message || "No se pudo conectar con el servidor."); }
-      finally { if (button) { button.disabled = false; button.innerHTML = `CREAR MI CUENTA <i class="bi bi-arrow-up-right ms-2"></i>`; } }
+        const response = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nombre: get("reg-nombre"),
+            apellido: get("reg-apellido"),
+            email: get("reg-email"),
+            password
+          })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "No se pudo crear la cuenta.");
+        }
+        const nextUrl = "/login.html?creada=1" + (solicitar ? `&solicitar=${solicitar}` : "") + (redirect ? `&redirect=${encodeURIComponent(redirect)}` : "");
+        window.location.href = nextUrl;
+      } catch (error) {
+        showAlert(alertBox, "danger", error.message || "No se pudo conectar con el servidor.");
+      } finally {
+        if (button) {
+          button.disabled = false;
+          button.innerHTML = `CREAR MI CUENTA <i class="bi bi-arrow-up-right ms-2"></i>`;
+        }
+      }
     });
   }
+
+  // Toggle visibilidad de contraseña
   document.querySelectorAll(".password-toggle-btn").forEach(button => button.addEventListener("click", () => {
-    const input = document.getElementById(button.dataset.target); const icon = button.querySelector("i"); if (!input) return;
-    input.type = input.type === "password" ? "text" : "password"; if (icon) icon.className = input.type === "password" ? "bi bi-eye" : "bi bi-eye-slash";
+    const input = document.getElementById(button.dataset.target);
+    const icon = button.querySelector("i");
+    if (!input) return;
+    input.type = input.type === "password" ? "text" : "password";
+    if (icon) icon.className = input.type === "password" ? "bi bi-eye" : "bi bi-eye-slash";
   }));
+}
+
+function initPlanes() {
+  const btnProto = document.getElementById("btn-solicitar-prototipo");
+  if (btnProto) {
+    btnProto.addEventListener("click", (e) => {
+      const rawUser = localStorage.getItem("usuario");
+      if (!rawUser) {
+        e.preventDefault();
+        window.location.href = "/login.html?solicitar=prototipo&redirect=/contacto.html?interes=Prototipo";
+      } else {
+        e.preventDefault();
+        window.location.href = "/contacto.html?interes=Prototipo";
+      }
+    });
+  }
+
+  document.querySelectorAll(".plan-button").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const rawUser = localStorage.getItem("usuario");
+      const href = btn.getAttribute("href");
+      if (!rawUser) {
+        e.preventDefault();
+        window.location.href = `/login.html?solicitar=plan&redirect=${encodeURIComponent(href)}`;
+      }
+    });
+  });
 }
 
 function showAlert(container, type, message) {
   if (!container) return;
   container.className = `alert alert-${type} py-2 px-3 mb-3 border-0`;
   container.style.fontSize = "13px";
-  container.innerHTML = `<i class="bi ${type === "success" ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill"} me-2"></i>${escapeHtml(message)}`;
+  container.innerHTML = `<i class="bi ${type === "success" ? "bi-check-circle-fill" : type === "info" ? "bi-info-circle-fill" : "bi-exclamation-triangle-fill"} me-2"></i>${message}`;
   container.classList.remove("d-none");
 }
 
 function escapeHtml(value) {
-  return String(value).replace(/[&<>\'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[char]));
+  return String(value).replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[char]));
 }

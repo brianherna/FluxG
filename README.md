@@ -8,9 +8,27 @@ Plataforma web construida con **Spring Boot 3**, **MongoDB Atlas** y frontend mo
 - Maven 3.8+
 - Conexión a Internet (MongoDB Atlas)
 
-## 💻 Ejecución en Local
+## 🌐 Cómo activar GitHub Pages (2 Pasos)
 
-1. Clona el repositorio si aún no lo has hecho:
+La web ya está preparada para funcionar en **GitHub Pages** (con enlaces relativos y soporte interactivo total):
+
+1. En tu repositorio de GitHub (`https://github.com/brianherna/FluxG`):
+   - Ve a la pestaña **Settings** (Configuración) arriba a la derecha.
+   - En el menú lateral izquierdo, haz clic en **Pages**.
+2. En la sección **Build and deployment**:
+   - **Source**: Selecciona `Deploy from a branch`
+   - **Branch**: Selecciona `main` y en la carpeta elige `/docs`
+   - Haz clic en **Save**.
+3. ¡Listo! En 1 minuto tu sitio estará publicado y accesible en:
+   👉 **https://brianherna.github.io/FluxG/**
+
+*(Nota: También se incluyó un flujo de trabajo automático en `.github/workflows/deploy-pages.yml` por si prefieres seleccionar Source: "GitHub Actions").*
+
+---
+
+## 💻 Ejecución en Local (Con Backend Spring Boot & MongoDB Atlas)
+
+1. Clona el repositorio:
    ```bash
    git clone https://github.com/brianherna/FluxG.git
    cd FluxG
@@ -30,18 +48,13 @@ Plataforma web construida con **Spring Boot 3**, **MongoDB Atlas** y frontend mo
 
 ---
 
-## 🌐 Cómo desplegarlo en la Nube GRATIS (Render / Railway)
+## 🚀 Despliegue Fullstack en la Nube con Docker (Render / Railway)
 
-Dado que FluxG utiliza un backend en **Spring Boot (Java)** conectado a **MongoDB Atlas**, no se puede alojar en GitHub Pages (ya que Pages no ejecuta Java).
-
-La forma más rápida y 100% gratuita de tenerlo público en Internet es mediante **Render**:
+Si además de la versión estática de GitHub Pages deseas que el backend Java Spring Boot esté en la nube conectado en vivo a MongoDB Atlas:
 
 1. Entra a [render.com](https://render.com) e inicia sesión con tu cuenta de GitHub.
 2. Haz clic en **New +** y selecciona **Web Service**.
 3. Elige tu repositorio: `brianherna/FluxG`.
-4. Render detectará automáticamente el archivo `Dockerfile`:
-   - **Environment**: `Docker`
-   - **Plan**: `Free`
-5. Haz clic en **Deploy Web Service**.
-6. En unos minutos tendrás tu enlace público oficial (ej. `https://fluxg.onrender.com`) accesible desde cualquier dispositivo.
+4. Render detectará automáticamente el archivo `Dockerfile` incluido en la raíz.
+5. Haz clic en **Deploy Web Service**. Render te dará un enlace público oficial (ej. `https://fluxg.onrender.com`).
 

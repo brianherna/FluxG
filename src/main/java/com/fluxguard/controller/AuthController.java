@@ -38,14 +38,14 @@ public class AuthController {
                     .body(ApiResponse.error("Todos los campos son obligatorios"));
         }
 
-        if (password.length() < 8 || !password.matches(".*[A-Z].*") || !password.matches(".*[!@#$%^&*(),.?\":{}|<>_\\-\\\\/[\\]~`+=].*")) {
+        if (password.length() < 8 || !tieneMayuscula(password) || !tieneCaracterEspecial(password)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.error("La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un carácter especial (ej. @, #, $, !, %)."));
         }
 
         if (usuarioRepository.existsByCorreo(email)) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ApiResponse.error("El correo ya está registrado"));
+                    .body(ApiResponse.error("Ya existe una cuenta registrada con este correo electrónico. Por favor inicia sesión."));
         }
 
         String passwordHash = passwordEncoder.encode(password);
@@ -60,7 +60,7 @@ public class AuthController {
                 guardado.getFechaRegistro()
         );
 
-        ApiResponse<UsuarioDto> response = ApiResponse.ok("Usuario registrado correctamente");
+        ApiResponse<UsuarioDto> response = ApiResponse.ok("Usuario registrado correctamente en MongoDB Atlas");
         response.setUsuario(usuarioDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -78,13 +78,13 @@ public class AuthController {
         Optional<Usuario> optionalUsuario = usuarioRepository.findByCorreo(email);
         if (optionalUsuario.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error("Correo o contraseña incorrectos"));
+                    .body(ApiResponse.error("No existe ninguna cuenta registrada con este correo electrónico. Tienes prohibido el acceso hasta que crees una cuenta."));
         }
 
         Usuario usuario = optionalUsuario.get();
         if (!passwordEncoder.matches(password, usuario.getPasswordHash())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error("Correo o contraseña incorrectos"));
+                    .body(ApiResponse.error("Contraseña incorrecta para esta cuenta."));
         }
 
         UsuarioDto usuarioDto = new UsuarioDto(
@@ -98,5 +98,24 @@ public class AuthController {
         ApiResponse<UsuarioDto> response = ApiResponse.ok("Inicio de sesión correcto");
         response.setUsuario(usuarioDto);
         return ResponseEntity.ok(response);
+    }
+
+    private boolean tieneMayuscula(String pwd) {
+        for (char c : pwd.toCharArray()) {
+            if (Character.isUpperCase(c)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean tieneCaracterEspecial(String pwd) {
+        String especiales = "!@#$%^&*(),.?\":{}|<>_-\\/[]~`+=";
+        for (char c : pwd.toCharArray()) {
+            if (especiales.indexOf(c) >= 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }

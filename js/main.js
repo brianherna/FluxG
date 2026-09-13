@@ -3,6 +3,10 @@
  * Navegación, UI, mapa, autenticación y formularios.
  */
 
+const API_BASE = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+  ? (window.location.port === "8080" ? "" : "http://localhost:8080")
+  : (localStorage.getItem("fluxg_api_url") || "");
+
 document.addEventListener("DOMContentLoaded", () => {
   initNavbar();
   initNavbarAuth();
@@ -268,7 +272,7 @@ function initContactForm() {
       let data = null;
       // 1. Intento con backend Spring Boot / MongoDB Atlas
       try {
-        const response = await fetch("/api/prospectos", {
+        const response = await fetch(`${API_BASE}/api/prospectos`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -354,10 +358,10 @@ function initAuthForms() {
 
     loginForm.addEventListener("submit", async event => {
       event.preventDefault();
-      const email = document.getElementById("login-email")?.value.trim() || "";
+      const email = document.getElementById("login-email")?.value.trim().toLowerCase() || "";
       const password = document.getElementById("login-password")?.value || "";
 
-      // Validación estricta en frontend
+      // Validación estricta de contraseña en frontend
       const pwdError = validarPassword(password);
       if (pwdError) {
         return showAlert(alertBox, "danger", pwdError);
@@ -370,40 +374,45 @@ function initAuthForms() {
 
       try {
         let data = null;
-        // Intento backend Spring Boot
+        let backendError = null;
+
+        // Intento backend Spring Boot / MongoDB Atlas
         try {
-          const response = await fetch("/api/auth/login", {
+          const response = await fetch(`${API_BASE}/api/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password })
           });
-          if (response.ok) {
-            data = await response.json();
+          const resJson = await response.json().catch(() => null);
+          if (response.ok && resJson && resJson.success) {
+            data = resJson;
           } else {
-            const errData = await response.json().catch(() => null);
-            if (errData && errData.message) throw new Error(errData.message);
+            backendError = (resJson && resJson.message) ? resJson.message : "Credenciales inválidas.";
           }
-        } catch (fetchErr) {
-          if (fetchErr && fetchErr.message && !fetchErr.message.includes("Failed to fetch")) {
-            throw fetchErr;
-          }
+        } catch (_) {
+          backendError = null;
         }
 
-        // Fallback local para GitHub Pages
+        // Si el backend respondió con un rechazo explícito (ej. cuenta no encontrada o contraseña errónea en MongoDB Atlas)
+        if (backendError) {
+          throw new Error(backendError);
+        }
+
+        // Fallback para GitHub Pages o persistencia local
         if (!data || !data.success) {
           const registrados = JSON.parse(localStorage.getItem("fluxg_usuarios") || "[]");
-          const userFound = registrados.find(u => u.email.toLowerCase() === email.toLowerCase());
-          if (userFound) {
-            if (userFound.password !== password) {
-              throw new Error("Contraseña incorrecta para el usuario registrado.");
-            }
-            data = { success: true, usuario: { nombre: userFound.nombre, apellido: userFound.apellido, correo: userFound.email } };
-          } else if (email) {
-            // Modo demostración con contraseña válida que cumple todas las directivas
-            data = { success: true, usuario: { nombre: email.split("@")[0], apellido: "", correo: email } };
-          } else {
-            throw new Error("Credenciales inválidas.");
+          const userFound = registrados.find(u => u.email.toLowerCase() === email);
+
+          // REGLA ESTRICTA: Si la cuenta NO existe, TIENE PROHIBIDO ENTRAR
+          if (!userFound) {
+            throw new Error(`No existe ninguna cuenta registrada con el correo "${escapeHtml(email)}". Tienes prohibido el acceso; por favor crea una cuenta primero.`);
           }
+
+          if (userFound.password !== password) {
+            throw new Error("Contraseña incorrecta para esta cuenta.");
+          }
+
+          data = { success: true, usuario: { nombre: userFound.nombre, apellido: userFound.apellido, correo: userFound.email } };
         }
 
         // Preservar suscripción existente si ya la tenía en localStorage
@@ -464,6 +473,7 @@ function initAuthForms() {
     registerForm.addEventListener("submit", async event => {
       event.preventDefault();
       const get = id => document.getElementById(id)?.value.trim() || "";
+      const email = get("reg-email").toLowerCase();
       const password = document.getElementById("reg-password")?.value || "";
       const confirm = document.getElementById("reg-confirm")?.value || "";
 
@@ -473,6 +483,13 @@ function initAuthForms() {
       const pwdError = validarPassword(password);
       if (pwdError) return showAlert(alertBox, "danger", pwdError);
 
+      // Verificación en frontend si ya existe localmente
+      const registrados = JSON.parse(localStorage.getItem("fluxg_usuarios") || "[]");
+      const yaExisteLocal = registrados.some(u => u.email.toLowerCase() === email);
+      if (yaExisteLocal) {
+        return showAlert(alertBox, "danger", `El correo "${escapeHtml(email)}" ya se encuentra registrado. Por favor inicia sesión.`);
+      }
+
       if (button) {
         button.disabled = true;
         button.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> CREANDO CUENTA...`;
@@ -480,48 +497,45 @@ function initAuthForms() {
 
       try {
         let data = null;
-        // Intento backend Spring Boot
+        let backendError = null;
+
+        // Intento backend Spring Boot / MongoDB Atlas
         try {
-          const response = await fetch("/api/auth/register", {
+          const response = await fetch(`${API_BASE}/api/auth/register`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               nombre: get("reg-nombre"),
               apellido: get("reg-apellido"),
-              email: get("reg-email"),
-              password
+              email: email,
+              password: password
             })
           });
-          if (response.ok) {
-            data = await response.json();
+          const resJson = await response.json().catch(() => null);
+          if (response.ok && resJson && resJson.success) {
+            data = resJson;
           } else {
-            const errData = await response.json().catch(() => null);
-            if (errData && errData.message) throw new Error(errData.message);
+            backendError = (resJson && resJson.message) ? resJson.message : "Error al crear la cuenta.";
           }
-        } catch (fetchErr) {
-          if (fetchErr && fetchErr.message && !fetchErr.message.includes("Failed to fetch")) {
-            throw fetchErr;
-          }
+        } catch (_) {
+          backendError = null;
         }
 
-        // Fallback local para GitHub Pages
-        if (!data || !data.success) {
-          const newUser = {
-            nombre: get("reg-nombre"),
-            apellido: get("reg-apellido"),
-            email: get("reg-email"),
-            password
-          };
-          const registrados = JSON.parse(localStorage.getItem("fluxg_usuarios") || "[]");
-          const idx = registrados.findIndex(u => u.email.toLowerCase() === newUser.email.toLowerCase());
-          if (idx >= 0) {
-            registrados[idx] = newUser;
-          } else {
-            registrados.push(newUser);
-          }
-          localStorage.setItem("fluxg_usuarios", JSON.stringify(registrados));
-          data = { success: true };
+        // Si el backend rechazó la creación (ej. cuenta duplicada en MongoDB Atlas)
+        if (backendError) {
+          throw new Error(backendError);
         }
+
+        // Guardar en la base de datos de usuarios registrados
+        const newUser = {
+          nombre: get("reg-nombre"),
+          apellido: get("reg-apellido"),
+          email: email,
+          password: password,
+          fechaRegistro: new Date().toISOString()
+        };
+        registrados.push(newUser);
+        localStorage.setItem("fluxg_usuarios", JSON.stringify(registrados));
 
         const nextParams = new URLSearchParams();
         nextParams.set("creada", "1");

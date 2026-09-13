@@ -7,6 +7,20 @@ const API_BASE = (window.location.hostname === "localhost" || window.location.ho
   ? (window.location.port === "8080" ? "" : "http://localhost:8080")
   : (localStorage.getItem("fluxg_api_url") || "");
 
+// Limpieza automática de correos y sesiones de prueba previas
+(function() {
+  if (!localStorage.getItem("fluxg_v4_clean")) {
+    localStorage.removeItem("fluxg_usuarios");
+    localStorage.removeItem("usuario");
+    localStorage.removeItem("fluxguard_active_subscription");
+    localStorage.setItem("fluxg_v4_clean", "true");
+  }
+  // En las páginas de login y registro nunca debe haber sesión activa preexistente
+  if (window.location.pathname.includes("login.html") || window.location.pathname.includes("crear-cuenta.html")) {
+    localStorage.removeItem("usuario");
+  }
+})();
+
 document.addEventListener("DOMContentLoaded", () => {
   initNavbar();
   initNavbarAuth();
@@ -347,14 +361,19 @@ function initAuthForms() {
     } else if (solicitar === "plan" || plan) {
       const planNombre = plan ? plan.toUpperCase() : "SELECCIONADO";
       showAlert(alertBox, "info", `<strong>Plan ${planNombre}:</strong> Inicia sesión para continuar al pago y activación de tu suscripción. ¿No tienes cuenta? <a href='crear-cuenta.html?solicitar=plan&plan=${plan || "standard"}&redirect=${encodeURIComponent(redirect || `pago.html?plan=${plan || "standard"}`)}' class='text-white text-decoration-underline fw-bold'>Crea tu cuenta aquí</a>.`);
-    }
-
-    // Actualizar enlace a crear cuenta para preservar redirect
     const createLink = document.querySelector(".login-register a[href*='crear-cuenta']");
     if (createLink) {
       const queryStr = window.location.search;
       if (queryStr) createLink.href = "crear-cuenta.html" + queryStr;
     }
+
+    // Botón para limpiar todos los datos y correos en caché
+    document.getElementById("btn-reset-cache")?.addEventListener("click", () => {
+      localStorage.removeItem("usuario");
+      localStorage.removeItem("fluxg_usuarios");
+      localStorage.removeItem("fluxguard_active_subscription");
+      showAlert(alertBox, "info", "Se han borrado todos los correos y sesiones guardadas. Ahora el sistema está completamente limpio.");
+    });
 
     loginForm.addEventListener("submit", async event => {
       event.preventDefault();

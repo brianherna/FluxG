@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" data-bs-theme="dark">
 <head>
   <meta charset="UTF-8">
@@ -484,7 +484,20 @@
       try {
         user = JSON.parse(rawUser);
       } catch (_) {
+        localStorage.removeItem("usuario");
         window.location.href = "login.html";
+        return;
+      }
+
+      if (!user || !user.correo) {
+        localStorage.removeItem("usuario");
+        window.location.href = "login.html?redirect=dashboard.html";
+        return;
+      }
+
+      // Si el usuario no tiene suscripción activa, enviarlo a elegir plan
+      if (!user.suscripcion) {
+        window.location.href = "planes.html";
         return;
       }
 
@@ -492,19 +505,9 @@
       const nombreCompleto = `${user.nombre || "Usuario"} ${user.apellido || ""}`.trim();
       document.getElementById("dash-owner-name").textContent = nombreCompleto.toUpperCase();
       document.getElementById("user-greeting-btn").textContent = user.nombre || "Usuario";
-      document.getElementById("user-email-header").textContent = user.correo || "usuario@fluxguard.io";
+      document.getElementById("user-email-header").textContent = user.correo;
 
-      // Suscripción
-      const sub = user.suscripcion || {
-        plan: "Plan Standard",
-        tipo: "standard",
-        precio: 578.84,
-        estado: "Activa",
-        circuitos: 5,
-        fechaInicio: new Date().toLocaleDateString("es-MX"),
-        proximoCobro: "13/10/2026",
-        transaccionId: "FLX-849201"
-      };
+      const sub = user.suscripcion;
 
       document.getElementById("dash-plan-chip").textContent = `${sub.plan.toUpperCase()} · ESTADO: ${sub.estado.toUpperCase()}`;
       document.getElementById("dropdown-plan-badge").innerHTML = `<i class="bi bi-stars me-1"></i> ${sub.plan}`;

@@ -543,15 +543,15 @@
 
         setTimeout(() => {
           // Guardar suscripción en localStorage del usuario
-          let userObj = {};
           const current = localStorage.getItem("usuario");
-          if (current) {
-            try { userObj = JSON.parse(current); } catch(_) {}
-          } else {
-            userObj = {
-              nombre: "Usuario",
-              correo: "cliente@fluxguard.io"
-            };
+          if (!current) {
+            window.location.href = `login.html?solicitar=plan&plan=${plan}&redirect=${encodeURIComponent(window.location.href)}`;
+            return;
+          }
+          let userObj = {};
+          try { userObj = JSON.parse(current); } catch(_) {
+            window.location.href = `login.html?solicitar=plan&plan=${plan}&redirect=${encodeURIComponent(window.location.href)}`;
+            return;
           }
 
           userObj.suscripcion = {

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FluxGuard — Pasarela de Pago y Activación</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .checkout-page {
+      min-height: 100vh;
+      background: #0b0815;
+      color: #ffffff;
+      padding-top: 84px;
+      padding-bottom: 70px;
+      position: relative;
+    }
+    .checkout-container {
+      width: min(1200px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.9fr) minmax(420px, 1.1fr);
+      gap: 36px;
+      align-items: start;
+      margin-top: 28px;
+    }
+    .checkout-card {
+      background: rgba(18, 12, 30, 0.95);
+      border: 1px solid rgba(185, 167, 255, 0.22);
+      border-radius: 8px;
+      padding: 34px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    }
+    .plan-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(185, 167, 255, 0.15);
+      border: 1px solid var(--gold);
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-radius: 999px;
+    }
+    .checkout-price {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 56px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1;
+      margin: 16px 0 8px;
+    }
+    .checkout-price span {
+      font-size: 18px;
+      color: var(--gold);
+      font-weight: 700;
+    }
+    .benefit-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 11px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      color: #f1edfa;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .benefit-item i {
+      color: var(--gold);
+      font-size: 16px;
+      margin-top: 2px;
+    }
+    .method-btn {
+      flex: 1;
+      padding: 14px;
+      border: 1px solid rgba(185, 167, 255, 0.3);
+      background: #140d24;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 13px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+    .method-btn.active {
+      border-color: var(--gold);
+      background: rgba(185, 167, 255, 0.16);
+      box-shadow: 0 0 16px rgba(185, 167, 255, 0.25);
+    }
+    .form-floating-custom label {
+      color: #f1edfa !important;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .form-input-custom {
+      width: 100%;
+      padding: 13px 16px;
+      background: #150e24 !important;
+      border: 1px solid rgba(185, 167, 255, 0.3) !important;
+      border-radius: 4px;
+      color: #ffffff !important;
+      font-size: 14px;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input-custom:focus {
+      border-color: var(--gold) !important;
+      box-shadow: 0 0 12px rgba(185, 167, 255, 0.25);
+    }
+    .btn-pay-action {
+      width: 100%;
+      padding: 16px;
+      background: var(--gold);
+      color: #0b0815;
+      font-weight: 900;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      margin-top: 24px;
+    }
+    .btn-pay-action:hover {
+      background: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(185, 167, 255, 0.45);
+    }
+    @media (max-width: 900px) {
+      .checkout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="checkout-page">
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <a href="index.html#inicio" class="navbar-logo" aria-label="FluxGuard - Inicio">
+      <img src="assets/fluxguard-logo-full.png" class="navbar-logo-image" alt="FluxGuard">
+    </a>
+
+    <nav class="navbar-links" id="navbarMenu">
+      <a href="index.html#inicio">Inicio</a>
+      <a href="planes.html">Planes</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+
+    <div class="navbar-actions">
+      <a href="planes.html" class="btn btn-outline-light btn-sm px-3" style="font-size:11px; font-weight:700;">
+        <i class="bi bi-arrow-left me-1"></i> CAMBIAR PLAN
+      </a>
+    </div>
+  </header>
+
+  <main class="checkout-container">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pb-2 border-bottom border-secondary border-opacity-25">
+      <div>
+        <span class="section-eyebrow">
+          <span></span> PASARELA DE PAGO SEGURA FLUXGUARD
+        </span>
+        <h1 class="text-white mt-2 mb-0" style="font-size: clamp(32px, 4.5vw, 48px); font-weight: 900;">
+          CONFIRMA TU SUSCRIPCIÓN
+        </h1>
+      </div>
+      <div class="d-flex align-items-center gap-3 text-white-50" style="font-size: 12px; font-weight: 600;">
+        <span class="text-white"><i class="bi bi-shield-lock-fill text-warning me-1"></i> Cifrado TLS 256 bits</span>
+        <span>•</span>
+        <span>Cancelación libre</span>
+      </div>
+    </div>
+
+    <div class="checkout-grid">
+      <!-- COLUMNA IZQUIERDA: RESUMEN DE LA SUSCRIPCIÓN -->
+      <section class="checkout-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span class="plan-badge-pill" id="badge-plan">
+            <i class="bi bi-lightning-charge-fill"></i> <span id="plan-name-badge">PLAN STANDARD</span>
+          </span>
+          <span class="text-white-50" style="font-size:11px; font-weight:800;">PASO 02 / 02</span>
+        </div>
+
+        <h3 class="text-white mb-1" id="plan-title" style="font-size:32px; font-weight:800; text-transform:uppercase;">
+          Suscripción Standard
+        </h3>
+        <p class="text-white mb-3" id="plan-desc" style="font-size:14px; color:#e0d8f5 !important;">
+          Monitoreo profesional para oficinas e instalaciones con supervisión continua de circuitos y alertas preventivas.
+        </p>
+
+        <div class="checkout-price">
+          <span id="plan-currency">$</span><span id="plan-price-val">499</span>
+          <span id="plan-period">MXN / MES</span>
+        </div>
+        <small class="d-block text-white-50 mb-4" style="font-size:11px;">* Facturación mensual recurrente. IVA incluido en el resumen final.</small>
+
+        <h6 class="text-white fw-bold mb-2" style="font-size:12px; letter-spacing:0.1em; text-transform:uppercase;">
+          ¿QUÉ INCLUYE TU PLAN?
+        </h6>
+        <div id="plan-benefits-list">
+          <div class="benefit-item">
+            <i class="bi bi-check-circle-fill"></i>
+            <span><strong>5 Circuitos de Medición</strong> activos en tiempo real</span>
+          </div>
+          <div class="benefit-item">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Monitoreo 24/7 de <strong>Voltaje, Corriente y Potencia</strong></span>
+          </div>
+          <div class="benefit-item">
+            <i class="bi bi-check-circle-fill"></i>
+            <span><strong>Alertas Inmediatas</strong> por sobrecarga y picos de consumo</span>
+          </div>
+          <div class="benefit-item">
+            <i class="bi bi-check-circle-fill"></i>
+            <span><strong>Estimación de costos</strong> y cálculo tarifario CFE</span>
+          </div>
+          <div class="benefit-item">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Exportación de reportes automáticos en <strong>PDF y CSV</strong></span>
+          </div>
+          <div class="benefit-item">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Historial completo de mediciones durante <strong>12 meses</strong></span>
+          </div>
+          <div class="benefit-item">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Acceso inmediato a tu <strong>Dashboard de Usuario IoT</strong></span>
+          </div>
+        </div>
+
+        <div class="mt-4 p-3 rounded" style="background: rgba(185, 167, 255, 0.08); border: 1px dashed rgba(185, 167, 255, 0.3);">
+          <div class="d-flex align-items-center gap-2 text-white" style="font-size:12px; font-weight:600;">
+            <i class="bi bi-patch-check-fill text-warning fs-5"></i>
+            <span>Activación instantánea tras confirmar tu pago.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- COLUMNA DERECHA: FORMULARIO DE PAGO -->
+      <section class="checkout-card">
+        <h4 class="text-white mb-1" style="font-size:26px; font-weight:800; text-transform:uppercase;">
+          Datos de Pago y Facturación
+        </h4>
+        <p class="text-white mb-4" style="font-size:13px; color:#e0d8f5 !important;">
+          Selecciona tu método de pago preferido para activar tu cuenta.
+        </p>
+
+        <!-- Selector Método -->
+        <div class="d-flex gap-2 mb-4">
+          <button type="button" class="method-btn active" id="btn-method-card">
+            <i class="bi bi-credit-card-2-front-fill fs-5"></i> Tarjeta Débito / Crédito
+          </button>
+          <button type="button" class="method-btn" id="btn-method-spei">
+            <i class="bi bi-bank fs-5"></i> Transferencia SPEI
+          </button>
+        </div>
+
+        <div id="checkout-alert" class="d-none"></div>
+
+        <form id="payment-form">
+          <!-- SECCIÓN TARJETA -->
+          <div id="section-card-fields">
+            <div class="mb-3 form-floating-custom">
+              <label for="card-holder">Nombre del Titular (Como aparece en la tarjeta)</label>
+              <input type="text" class="form-input-custom" id="card-holder" placeholder="EJ. CARLOS EDUARDO MENDOZA" required>
+            </div>
+
+            <div class="mb-3 form-floating-custom">
+              <label for="card-number">Número de Tarjeta (16 dígitos)</label>
+              <div class="position-relative">
+                <input type="text" class="form-input-custom" id="card-number" placeholder="4152 •••• •••• 8912" maxlength="19" required>
+                <span class="position-absolute end-0 top-50 translate-middle-y pe-3 text-white-50">
+                  <i class="bi bi-credit-card fs-5"></i>
+                </span>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-6 form-floating-custom">
+                <label for="card-exp">Vencimiento</label>
+                <input type="text" class="form-input-custom" id="card-exp" placeholder="MM/AA" maxlength="5" required>
+              </div>
+              <div class="col-6 form-floating-custom">
+                <label for="card-cvv">Código CVV / CVC</label>
+                <input type="password" class="form-input-custom" id="card-cvv" placeholder="•••" maxlength="4" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN SPEI (OCULTA POR DEFECTO) -->
+          <div id="section-spei-fields" class="d-none mb-3 p-3 rounded" style="background:#150e24; border:1px solid rgba(185,167,255,0.25);">
+            <div class="text-white mb-2" style="font-size:13px; font-weight:700;">
+              <i class="bi bi-info-circle-fill text-warning me-1"></i> Instrucciones para Transferencia SPEI:
+            </div>
+            <p class="text-white-50 mb-2" style="font-size:12px;">Transfiere desde tu app bancaria a la siguiente CLABE interbancaria autorizada por FluxGuard:</p>
+            <div class="p-2 rounded bg-dark border border-secondary text-white font-monospace text-center mb-2" style="font-size:14px; font-weight:700; letter-spacing:0.1em;">
+              646180157023849102
+            </div>
+            <div class="d-flex justify-content-between text-white-50" style="font-size:11px;">
+              <span>Banco: <strong>STP / FluxGuard Pay</strong></span>
+              <span>Beneficiario: <strong>FluxGuard IoT S.A.P.I.</strong></span>
+            </div>
+          </div>
+
+          <!-- RESUMEN DE COBRO -->
+          <div class="p-3 my-3 rounded" style="background:#10091c; border:1px solid rgba(255,255,255,0.1);">
+            <div class="d-flex justify-content-between text-white mb-1" style="font-size:13px;">
+              <span>Subtotal suscripción:</span>
+              <span id="summary-subtotal">$499.00 MXN</span>
+            </div>
+            <div class="d-flex justify-content-between text-white-50 mb-2" style="font-size:12px;">
+              <span>IVA (16%):</span>
+              <span id="summary-iva">$79.84 MXN</span>
+            </div>
+            <div class="d-flex justify-content-between text-white border-top border-secondary pt-2" style="font-size:16px; font-weight:800;">
+              <span>Total a Pagar Hoy:</span>
+              <span class="text-warning" id="summary-total">$578.84 MXN</span>
+            </div>
+          </div>
+
+          <div class="form-check my-3">
+            <input class="form-check-input" type="checkbox" id="terms-check" checked required>
+            <label class="form-check-label text-white" for="terms-check" style="font-size:12px; font-weight:500;">
+              He leído y acepto los <a href="#" class="text-decoration-underline" style="color:var(--gold);">Términos del Servicio</a> y la política de privacidad de FluxGuard.
+            </label>
+          </div>
+
+          <button type="submit" id="btn-submit-payment" class="btn-pay-action">
+            <span id="btn-pay-text">CONFIRMAR PAGO Y ACTIVAR MONITOREO</span>
+            <i class="bi bi-shield-fill-check fs-5"></i>
+          </button>
+        </form>
+
+        <div class="d-flex justify-content-center align-items-center gap-3 mt-4 text-white-50" style="font-size:11px;">
+          <span><i class="bi bi-lock-fill"></i> Pago protegido con SSL</span>
+          <span>•</span>
+          <span>Factura SAT automática</span>
+          <span>•</span>
+          <span>Soporte 24/7</span>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    // Lógica interactiva de Pago
+    document.addEventListener("DOMContentLoaded", () => {
+      initCheckoutPage();
+    });
+
+    function initCheckoutPage() {
+      const params = new URLSearchParams(window.location.search);
+      const plan = (params.get("plan") || "standard").toLowerCase();
+
+      // Configuración de los planes
+      const planesConfig = {
+        free: {
+          name: "Plan Free",
+          badge: "PLAN GRATUITO",
+          title: "Suscripción Gratuita",
+          desc: "Monitoreo básico en 1 punto de medición para conocer el comportamiento de tu instalación.",
+          price: "0",
+          subtotal: 0,
+          benefits: [
+            "1 circuito o medidor principal",
+            "Voltaje, corriente y potencia en tiempo real",
+            "Dashboard web de monitoreo activo",
+            "Historial de mediciones de hasta 7 días",
+            "Reporte semanal básico en pantalla",
+            "Soporte por documentación comunitaria"
+          ]
+        },
+        standard: {
+          name: "Plan Standard",
+          badge: "PLAN STANDARD (MÁS POPULAR)",
+          title: "Suscripción Standard",
+          desc: "Supervisión profesional para oficinas e instalaciones con alertas preventivas y reportes.",
+          price: "499",
+          subtotal: 499,
+          benefits: [
+            "Hasta 5 circuitos o zonas de medición en tiempo real",
+            "Monitoreo 24/7 de Voltaje, Corriente y Potencia",
+            "Alertas automáticas por sobrecarga y picos de consumo",
+            "Estimación de costo con tarifa eléctrica configurable",
+            "Exportación de reportes PDF y CSV",
+            "Historial completo de mediciones durante 12 meses",
+            "Acceso inmediato al Dashboard de Usuario IoT"
+          ]
+        },
+        ultimate: {
+          name: "Plan Ultimate",
+          badge: "PLAN CORPORATIVO ULTIMATE",
+          title: "Suscripción Ultimate",
+          desc: "Infraestructura a escala para organizaciones multi-sede con automatizaciones e integraciones API.",
+          price: "1,499",
+          subtotal: 1499,
+          benefits: [
+            "Circuitos ilimitados y capacidad multi-sede centralizada",
+            "Todo lo incluido en Standard",
+            "Automatizaciones y control de relés según proyecto",
+            "Análisis avanzado de armónicos y factor de potencia",
+            "Reportes ejecutivos de sostenibilidad y eficiencia energética",
+            "Usuarios, roles y permisos de acceso personalizables",
+            "Integración con API / Webhooks y soporte especializado 24/7"
+          ]
+        },
+        prototipo: {
+          name: "Prototipo Piloto",
+          badge: "PROTOTIPO PILOTO FLUXGUARD",
+          title: "Kit Piloto de Demostración",
+          desc: "Primera implementación con hardware IoT para demostración académica y pruebas operativas.",
+          price: "350",
+          subtotal: 350,
+          benefits: [
+            "Hardware microcontrolador con sensor de corriente no invasivo",
+            "Conexión WiFi/MQTT preconfigurada al servidor",
+            "Dashboard de monitoreo en vivo activado",
+            "Pruebas de campo y calibración asistida",
+            "Guía paso a paso de instalación y código fuente"
+          ]
+        }
+      };
+
+      const selected = planesConfig[plan] || planesConfig.standard;
+
+      // Actualizar DOM
+      document.getElementById("plan-name-badge").textContent = selected.badge;
+      document.getElementById("plan-title").textContent = selected.title;
+      document.getElementById("plan-desc").textContent = selected.desc;
+      document.getElementById("plan-price-val").textContent = selected.price;
+
+      const subtotal = selected.subtotal;
+      const iva = +(subtotal * 0.16).toFixed(2);
+      const total = +(subtotal + iva).toFixed(2);
+
+      document.getElementById("summary-subtotal").textContent = "$" + subtotal.toFixed(2) + " MXN";
+      document.getElementById("summary-iva").textContent = "$" + iva.toFixed(2) + " MXN";
+      document.getElementById("summary-total").textContent = "$" + total.toFixed(2) + " MXN";
+
+      if (subtotal === 0) {
+        document.getElementById("btn-pay-text").textContent = "ACTIVAR MONITOREO GRATUITO";
+      }
+
+      // Render beneficios
+      const benefitsContainer = document.getElementById("plan-benefits-list");
+      benefitsContainer.innerHTML = selected.benefits.map(b => `
+        <div class="benefit-item">
+          <i class="bi bi-check-circle-fill"></i>
+          <span>${b}</span>
+        </div>
+      `).join("");
+
+      // Precargar nombre de usuario o requerir login previo
+      const rawUser = localStorage.getItem("usuario");
+      if (!rawUser) {
+        window.location.href = `login.html?solicitar=plan&plan=${plan}&redirect=${encodeURIComponent(window.location.href)}`;
+        return;
+      }
+      try {
+        const u = JSON.parse(rawUser);
+        if (u.nombre && document.getElementById("card-holder")) {
+          document.getElementById("card-holder").value = `${u.nombre} ${u.apellido || ""}`.trim().toUpperCase();
+        }
+      } catch (_) {}
+
+      // Alternar métodos de pago
+      const btnCard = document.getElementById("btn-method-card");
+      const btnSpei = document.getElementById("btn-method-spei");
+      const cardSec = document.getElementById("section-card-fields");
+      const speiSec = document.getElementById("section-spei-fields");
+
+      btnCard.addEventListener("click", () => {
+        btnCard.classList.add("active");
+        btnSpei.classList.remove("active");
+        cardSec.classList.remove("d-none");
+        speiSec.classList.add("d-none");
+      });
+
+      btnSpei.addEventListener("click", () => {
+        btnSpei.classList.add("active");
+        btnCard.classList.remove("active");
+        cardSec.classList.add("d-none");
+        speiSec.classList.remove("d-none");
+      });
+
+      // Formato automático de tarjeta (cada 4 dígitos)
+      const inputNum = document.getElementById("card-number");
+      inputNum.addEventListener("input", (e) => {
+        let val = e.target.value.replace(/\D/g, "").substring(0, 16);
+        let formatted = val.match(/.{1,4}/g)?.join(" ") || val;
+        e.target.value = formatted;
+      });
+
+      // Formato fecha exp (MM/AA)
+      const inputExp = document.getElementById("card-exp");
+      inputExp.addEventListener("input", (e) => {
+        let val = e.target.value.replace(/\D/g, "").substring(0, 4);
+        if (val.length >= 3) {
+          e.target.value = val.substring(0, 2) + "/" + val.substring(2);
+        } else {
+          e.target.value = val;
+        }
+      });
+
+      // Procesar Pago
+      const form = document.getElementById("payment-form");
+      const alertBox = document.getElementById("checkout-alert");
+      const payButton = document.getElementById("btn-submit-payment");
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        payButton.disabled = true;
+        payButton.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> PROCESANDO TRANSACCIÓN BANCARIA...`;
+
+        setTimeout(() => {
+          // Guardar suscripción en localStorage del usuario
+          let userObj = {};
+          const current = localStorage.getItem("usuario");
+          if (current) {
+            try { userObj = JSON.parse(current); } catch(_) {}
+          } else {
+            userObj = {
+              nombre: "Usuario",
+              correo: "cliente@fluxguard.io"
+            };
+          }
+
+          userObj.suscripcion = {
+            plan: selected.name,
+            tipo: plan,
+            precio: total,
+            estado: "Activa",
+            circuitos: plan === "free" ? 1 : (plan === "ultimate" ? 12 : 5),
+            fechaInicio: new Date().toLocaleDateString("es-MX"),
+            proximoCobro: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString("es-MX"),
+            transaccionId: "FLX-" + Math.floor(100000 + Math.random() * 900000)
+          };
+          localStorage.setItem("usuario", JSON.stringify(userObj));
+
+          showAlert(alertBox, "success", "<strong>¡Pago procesado con éxito!</strong> Tu suscripción ha sido activada. Redirigiendo a tu Dashboard de Monitoreo...");
+
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 1400);
+        }, 1600);
+      });
+    }
+
+    function showAlert(container, type, message) {
+      if (!container) return;
+      container.className = `alert alert-${type} py-2 px-3 mb-3 border-0`;
+      container.style.fontSize = "13px";
+      container.innerHTML = `<i class="bi ${type === "success" ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill"} me-2"></i>${message}`;
+      container.classList.remove("d-none");
+    }
+  </script>
+</body>
+</html>

@@ -50,13 +50,15 @@ function initNavbarAuth() {
     const usuario = JSON.parse(raw);
     const nombre = escapeHtml(usuario.nombre || "Usuario");
     const correo = escapeHtml(usuario.correo || "");
+    const subBadge = usuario.suscripcion ? `<span class="badge bg-success bg-opacity-25 text-success ms-2 font-monospace" style="font-size:9px;">ACTIVO</span>` : "";
     container.innerHTML = `
       <div class="dropdown">
         <button class="btn-flux-outline dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="bi bi-person-circle"></i> ${nombre}
+          <i class="bi bi-person-circle"></i> ${nombre} ${subBadge}
         </button>
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark">
           <li><h6 class="dropdown-header">${correo}</h6></li>
+          <li><a class="dropdown-item fw-bold text-warning" href="dashboard.html"><i class="bi bi-speedometer2 me-2"></i>Mi Dashboard IoT</a></li>
           <li><a class="dropdown-item" href="planes.html"><i class="bi bi-grid me-2"></i>Planes</a></li>
           <li><a class="dropdown-item" href="contacto.html"><i class="bi bi-chat-left-dots me-2"></i>Contacto</a></li>
           <li><hr class="dropdown-divider"></li>
@@ -307,9 +309,23 @@ function initContactForm() {
   });
 }
 
+function validarPassword(pwd) {
+  if (!pwd || pwd.length < 8) {
+    return "La contraseña debe tener al menos 8 caracteres.";
+  }
+  if (!/[A-Z]/.test(pwd)) {
+    return "La contraseña debe incluir al menos una letra mayúscula (A-Z).";
+  }
+  if (!/[!@#$%^&*(),.?":{}|<>\_\-\\\/\[\]~`+=]/.test(pwd)) {
+    return "La contraseña debe incluir al menos un carácter especial (ej. !@#$%&*).";
+  }
+  return null;
+}
+
 function initAuthForms() {
   const params = new URLSearchParams(window.location.search);
   const solicitar = params.get("solicitar");
+  const plan = params.get("plan");
   const redirect = params.get("redirect");
 
   // LOGIN FORM
@@ -319,23 +335,33 @@ function initAuthForms() {
     const button = document.getElementById("btn-login-submit");
 
     if (params.get("creada") === "1") {
-      showAlert(alertBox, "success", "Cuenta creada exitosamente. Ahora inicia sesión.");
+      showAlert(alertBox, "success", "Cuenta creada exitosamente. Ahora inicia sesión con tus credenciales.");
     }
 
-    if (solicitar === "prototipo") {
-      showAlert(alertBox, "info", "<strong>Solicitud de Prototipo:</strong> Inicia sesión con tu cuenta para continuar con tu solicitud. ¿No tienes cuenta? <a href='crear-cuenta.html?solicitar=prototipo' class='text-white text-decoration-underline fw-bold'>Crea tu cuenta aquí</a>.");
-      const createLink = document.querySelector(".login-register a[href*='crear-cuenta']");
-      if (createLink) createLink.href = "crear-cuenta.html?solicitar=prototipo" + (redirect ? `&redirect=${encodeURIComponent(redirect)}` : "");
-    } else if (solicitar === "plan") {
-      showAlert(alertBox, "info", "<strong>Suscripción de Plan:</strong> Inicia sesión con tu cuenta para continuar. ¿No tienes cuenta? <a href='crear-cuenta.html?solicitar=plan' class='text-white text-decoration-underline fw-bold'>Crea tu cuenta aquí</a>.");
-      const createLink = document.querySelector(".login-register a[href*='crear-cuenta']");
-      if (createLink) createLink.href = "crear-cuenta.html?solicitar=plan" + (redirect ? `&redirect=${encodeURIComponent(redirect)}` : "");
+    if (solicitar === "prototipo" || plan === "prototipo") {
+      showAlert(alertBox, "info", "<strong>Solicitud de Prototipo:</strong> Inicia sesión para continuar al pago y activación de tu kit piloto. ¿No tienes cuenta? <a href='crear-cuenta.html?solicitar=plan&plan=prototipo&redirect=" + encodeURIComponent(redirect || "pago.html?plan=prototipo") + "' class='text-white text-decoration-underline fw-bold'>Crea tu cuenta aquí</a>.");
+    } else if (solicitar === "plan" || plan) {
+      const planNombre = plan ? plan.toUpperCase() : "SELECCIONADO";
+      showAlert(alertBox, "info", `<strong>Plan ${planNombre}:</strong> Inicia sesión para continuar al pago y activación de tu suscripción. ¿No tienes cuenta? <a href='crear-cuenta.html?solicitar=plan&plan=${plan || "standard"}&redirect=${encodeURIComponent(redirect || `pago.html?plan=${plan || "standard"}`)}' class='text-white text-decoration-underline fw-bold'>Crea tu cuenta aquí</a>.`);
+    }
+
+    // Actualizar enlace a crear cuenta para preservar redirect
+    const createLink = document.querySelector(".login-register a[href*='crear-cuenta']");
+    if (createLink) {
+      const queryStr = window.location.search;
+      if (queryStr) createLink.href = "crear-cuenta.html" + queryStr;
     }
 
     loginForm.addEventListener("submit", async event => {
       event.preventDefault();
       const email = document.getElementById("login-email")?.value.trim() || "";
       const password = document.getElementById("login-password")?.value || "";
+
+      // Validación estricta en frontend
+      const pwdError = validarPassword(password);
+      if (pwdError) {
+        return showAlert(alertBox, "danger", pwdError);
+      }
 
       if (button) {
         button.disabled = true;
@@ -353,28 +379,54 @@ function initAuthForms() {
           });
           if (response.ok) {
             data = await response.json();
+          } else {
+            const errData = await response.json().catch(() => null);
+            if (errData && errData.message) throw new Error(errData.message);
           }
-        } catch (_) {}
+        } catch (fetchErr) {
+          if (fetchErr && fetchErr.message && !fetchErr.message.includes("Failed to fetch")) {
+            throw fetchErr;
+          }
+        }
 
         // Fallback local para GitHub Pages
         if (!data || !data.success) {
           const registrados = JSON.parse(localStorage.getItem("fluxg_usuarios") || "[]");
           const userFound = registrados.find(u => u.email.toLowerCase() === email.toLowerCase());
           if (userFound) {
+            if (userFound.password !== password) {
+              throw new Error("Contraseña incorrecta para el usuario registrado.");
+            }
             data = { success: true, usuario: { nombre: userFound.nombre, apellido: userFound.apellido, correo: userFound.email } };
-          } else if (email && password.length >= 8) {
+          } else if (email) {
+            // Modo demostración con contraseña válida que cumple todas las directivas
             data = { success: true, usuario: { nombre: email.split("@")[0], apellido: "", correo: email } };
           } else {
-            throw new Error("Credenciales no válidas. Asegúrate de que la contraseña tenga mínimo 8 caracteres.");
+            throw new Error("Credenciales inválidas.");
           }
+        }
+
+        // Preservar suscripción existente si ya la tenía en localStorage
+        const prevUserRaw = localStorage.getItem("usuario");
+        if (prevUserRaw) {
+          try {
+            const prevUser = JSON.parse(prevUserRaw);
+            if (prevUser.correo === data.usuario.correo && prevUser.suscripcion) {
+              data.usuario.suscripcion = prevUser.suscripcion;
+            }
+          } catch (_) {}
         }
 
         localStorage.setItem("usuario", JSON.stringify(data.usuario));
 
-        if (solicitar === "prototipo") {
-          window.location.href = "contacto.html?interes=Prototipo";
-        } else if (redirect) {
+        if (redirect) {
           window.location.href = decodeURIComponent(redirect);
+        } else if (solicitar === "prototipo" || plan === "prototipo") {
+          window.location.href = "pago.html?plan=prototipo";
+        } else if (solicitar === "plan" && plan) {
+          window.location.href = `pago.html?plan=${plan}`;
+        } else if (data.usuario.suscripcion) {
+          window.location.href = "dashboard.html";
         } else {
           window.location.href = "index.html";
         }
@@ -395,10 +447,18 @@ function initAuthForms() {
     const alertBox = document.getElementById("register-alert");
     const button = document.getElementById("btn-register-submit");
 
-    if (solicitar === "prototipo") {
-      showAlert(alertBox, "info", "<strong>Solicitud de Prototipo:</strong> Crea tu cuenta gratuita para continuar con tu solicitud de prototipo de FluxGuard.");
-      const loginLink = document.querySelector(".login-register a[href*='login']");
-      if (loginLink) loginLink.href = "login.html?solicitar=prototipo" + (redirect ? `&redirect=${encodeURIComponent(redirect)}` : "");
+    if (solicitar === "prototipo" || plan === "prototipo") {
+      showAlert(alertBox, "info", "<strong>Solicitud de Prototipo:</strong> Crea tu cuenta gratuita para continuar con el kit piloto de FluxGuard.");
+    } else if (solicitar === "plan" || plan) {
+      const planNombre = plan ? plan.toUpperCase() : "";
+      showAlert(alertBox, "info", `<strong>Registro de Usuario ${planNombre}:</strong> Crea tu cuenta para continuar a la activación de tu suscripción.`);
+    }
+
+    // Actualizar enlace a login para preservar parámetros
+    const loginLink = document.querySelector(".login-register a[href*='login']");
+    if (loginLink) {
+      const queryStr = window.location.search;
+      if (queryStr) loginLink.href = "login.html" + queryStr;
     }
 
     registerForm.addEventListener("submit", async event => {
@@ -408,7 +468,10 @@ function initAuthForms() {
       const confirm = document.getElementById("reg-confirm")?.value || "";
 
       if (password !== confirm) return showAlert(alertBox, "danger", "Las contraseñas no coinciden.");
-      if (password.length < 8) return showAlert(alertBox, "danger", "La contraseña debe tener al menos 8 caracteres.");
+
+      // Validación estricta: 8+ caracteres, mayúscula y carácter especial
+      const pwdError = validarPassword(password);
+      if (pwdError) return showAlert(alertBox, "danger", pwdError);
 
       if (button) {
         button.disabled = true;
@@ -431,8 +494,15 @@ function initAuthForms() {
           });
           if (response.ok) {
             data = await response.json();
+          } else {
+            const errData = await response.json().catch(() => null);
+            if (errData && errData.message) throw new Error(errData.message);
           }
-        } catch (_) {}
+        } catch (fetchErr) {
+          if (fetchErr && fetchErr.message && !fetchErr.message.includes("Failed to fetch")) {
+            throw fetchErr;
+          }
+        }
 
         // Fallback local para GitHub Pages
         if (!data || !data.success) {
@@ -443,13 +513,23 @@ function initAuthForms() {
             password
           };
           const registrados = JSON.parse(localStorage.getItem("fluxg_usuarios") || "[]");
-          registrados.push(newUser);
+          const idx = registrados.findIndex(u => u.email.toLowerCase() === newUser.email.toLowerCase());
+          if (idx >= 0) {
+            registrados[idx] = newUser;
+          } else {
+            registrados.push(newUser);
+          }
           localStorage.setItem("fluxg_usuarios", JSON.stringify(registrados));
           data = { success: true };
         }
 
-        const nextUrl = "login.html?creada=1" + (solicitar ? `&solicitar=${solicitar}` : "") + (redirect ? `&redirect=${encodeURIComponent(redirect)}` : "");
-        window.location.href = nextUrl;
+        const nextParams = new URLSearchParams();
+        nextParams.set("creada", "1");
+        if (solicitar) nextParams.set("solicitar", solicitar);
+        if (plan) nextParams.set("plan", plan);
+        if (redirect) nextParams.set("redirect", redirect);
+
+        window.location.href = "login.html?" + nextParams.toString();
       } catch (error) {
         showAlert(alertBox, "danger", error.message || "No se pudo conectar con el servidor.");
       } finally {
@@ -475,24 +555,32 @@ function initPlanes() {
   const btnProto = document.getElementById("btn-solicitar-prototipo");
   if (btnProto) {
     btnProto.addEventListener("click", (e) => {
+      e.preventDefault();
       const rawUser = localStorage.getItem("usuario");
+      const target = "pago.html?plan=prototipo";
       if (!rawUser) {
-        e.preventDefault();
-        window.location.href = "login.html?solicitar=prototipo&redirect=" + encodeURIComponent("contacto.html?interes=Prototipo");
+        window.location.href = `login.html?solicitar=plan&plan=prototipo&redirect=${encodeURIComponent(target)}`;
       } else {
-        e.preventDefault();
-        window.location.href = "contacto.html?interes=Prototipo";
+        window.location.href = target;
       }
     });
   }
 
   document.querySelectorAll(".plan-button").forEach(btn => {
     btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      let href = btn.getAttribute("href") || "";
+      let plan = "standard";
+      if (href.includes("free") || btn.textContent.toLowerCase().includes("gratis")) plan = "free";
+      else if (href.includes("ultimate") || btn.textContent.toLowerCase().includes("ventas") || btn.textContent.toLowerCase().includes("ultimate")) plan = "ultimate";
+      else if (href.includes("standard")) plan = "standard";
+
+      const target = `pago.html?plan=${plan}`;
       const rawUser = localStorage.getItem("usuario");
-      const href = btn.getAttribute("href");
       if (!rawUser) {
-        e.preventDefault();
-        window.location.href = `login.html?solicitar=plan&redirect=${encodeURIComponent(href)}`;
+        window.location.href = `login.html?solicitar=plan&plan=${plan}&redirect=${encodeURIComponent(target)}`;
+      } else {
+        window.location.href = target;
       }
     });
   });

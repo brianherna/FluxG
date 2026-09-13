@@ -38,9 +38,9 @@ public class AuthController {
                     .body(ApiResponse.error("Todos los campos son obligatorios"));
         }
 
-        if (password.length() < 8) {
+        if (password.length() < 8 || !password.matches(".*[A-Z].*") || !password.matches(".*[!@#$%^&*(),.?\":{}|<>_\\-\\\\/[\\]~`+=].*")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error("La contraseña debe tener al menos 8 caracteres"));
+                    .body(ApiResponse.error("La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un carácter especial (ej. @, #, $, !, %)."));
         }
 
         if (usuarioRepository.existsByCorreo(email)) {

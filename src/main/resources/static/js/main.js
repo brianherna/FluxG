@@ -492,8 +492,8 @@ function initAuthForms() {
           const resJson = await response.json().catch(() => null);
           if (response.ok && resJson && resJson.success) {
             data = resJson;
-          } else {
-            backendError = (resJson && resJson.message) ? resJson.message : "Credenciales inválidas.";
+          } else if (resJson && resJson.message && response.status !== 404) {
+            backendError = resJson.message;
           }
         } catch (_) {
           backendError = null;
@@ -620,8 +620,8 @@ function initAuthForms() {
           const resJson = await response.json().catch(() => null);
           if (response.ok && resJson && resJson.success) {
             data = resJson;
-          } else {
-            backendError = (resJson && resJson.message) ? resJson.message : "Error al crear la cuenta.";
+          } else if (resJson && resJson.message && response.status !== 404) {
+            backendError = resJson.message;
           }
         } catch (_) {
           backendError = null;

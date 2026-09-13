@@ -4,12 +4,6 @@
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-  if (document.querySelector(".hero-cinematic")) {
-    const css = document.createElement("link");
-    css.rel = "stylesheet";
-    css.href = "/css/fluxg-v2.css";
-    document.head.appendChild(css);
-  }
   initNavbar();
   initNavbarAuth();
   initHeroPromos();
@@ -130,8 +124,10 @@ function initPlatformCarousel() {
   const next = document.getElementById("btn-platform-next");
   const counter = document.getElementById("platform-counter");
   const dots = [...document.querySelectorAll("#platform-dots button")];
+  const wrapper = document.getElementById("platformCarouselWrapper");
   if (!track || !dots.length) return;
   let index = 0;
+  let timer = null;
   const total = dots.length;
   const render = nextIndex => {
     index = (nextIndex + total) % total;
@@ -139,10 +135,17 @@ function initPlatformCarousel() {
     dots.forEach((dot, i) => dot.classList.toggle("active", i === index));
     if (counter) counter.textContent = `0${index + 1} / 0${total}`;
   };
-  prev?.addEventListener("click", () => render(index - 1));
-  next?.addEventListener("click", () => render(index + 1));
-  dots.forEach((dot, i) => dot.addEventListener("click", () => render(i)));
+  const startTimer = () => {
+    clearInterval(timer);
+    timer = setInterval(() => render(index + 1), 6500);
+  };
+  prev?.addEventListener("click", () => { render(index - 1); startTimer(); });
+  next?.addEventListener("click", () => { render(index + 1); startTimer(); });
+  dots.forEach((dot, i) => dot.addEventListener("click", () => { render(i); startTimer(); }));
+  wrapper?.addEventListener("mouseenter", () => clearInterval(timer));
+  wrapper?.addEventListener("mouseleave", () => startTimer());
   render(0);
+  startTimer();
 }
 
 function initBackToTop() {
@@ -150,6 +153,10 @@ function initBackToTop() {
   if (!button) return;
   const update = () => button.classList.toggle("visible", window.scrollY > 650);
   window.addEventListener("scroll", update, { passive: true });
+  button.addEventListener("click", (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
   update();
 }
 

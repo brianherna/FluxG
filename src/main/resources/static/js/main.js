@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initBackToTop();
   initMap();
   initContactForm();
+  initPasswordToggles();
   initAuthForms();
   initPlanes();
 });
@@ -189,39 +190,123 @@ function initMap() {
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap contributors" }).addTo(map);
   const fluxIcon = L.divIcon({ className: "custom-div-icon", html: `<div style="background:#b9a7ff;color:#100b19;padding:5px 10px;border-radius:999px;font-weight:900;font-size:10px;box-shadow:0 0 18px rgba(185,167,255,.7);white-space:nowrap">FLUXGUARD</div>`, iconSize: [110, 30], iconAnchor: [55, 15] });
   L.marker(destination, { icon: fluxIcon }).addTo(map).bindPopup("<b>FluxGuard</b><br>Mixquiahuala de Juárez, Hidalgo.");
+
+  let userMarker = null;
+  let currentRouteLayer = null;
+
   const locate = document.getElementById("btn-map-locate");
   const status = document.getElementById("map-route-status");
   const distanceEl = document.getElementById("route-distance-val");
   const durationEl = document.getElementById("route-duration-val");
-  document.getElementById("btn-reset-map")?.addEventListener("click", () => map.setView(destination, 14));
-  locate?.addEventListener("click", () => {
-    if (!navigator.geolocation) { if (status) status.textContent = "Tu navegador no permite geolocalización."; return; }
-    locate.disabled = true; locate.innerHTML = `<span class="spinner-border spinner-border-sm"></span> CALCULANDO...`;
-    if (status) status.textContent = "Obteniendo tu ubicación...";
-    navigator.geolocation.getCurrentPosition(async position => {
-      const user = [position.coords.latitude, position.coords.longitude];
-      const userIcon = L.divIcon({ className: "custom-div-icon", html: `<div style="background:#58e0a0;color:#07110d;padding:4px 8px;border-radius:999px;font-weight:900;font-size:9px;box-shadow:0 0 14px rgba(88,224,160,.6)">TÚ</div>`, iconSize: [35, 24], iconAnchor: [17, 12] });
-      L.marker(user, { icon: userIcon }).addTo(map);
-      try {
-        const url = `https://router.project-osrm.org/route/v1/driving/${user[1]},${user[0]};${destination[1]},${destination[0]}?overview=full&geometries=geojson`;
-        const response = await fetch(url); const data = await response.json(); const route = data.routes?.[0];
-        if (!route) throw new Error("Ruta no encontrada");
-        const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
-        const line = L.polyline(coords, { color: "#b9a7ff", weight: 5, opacity: .9 }).addTo(map);
-        map.fitBounds(line.getBounds(), { padding: [35, 35] });
-        if (distanceEl) distanceEl.textContent = `${(route.distance / 1000).toFixed(1)} km`;
-        if (durationEl) durationEl.textContent = `${Math.max(1, Math.round(route.duration / 60))} min`;
-        if (status) status.textContent = "Ruta calculada correctamente desde tu ubicación.";
-      } catch {
-        map.setView(user, 12);
-        if (status) status.textContent = "Ubicación obtenida, pero no fue posible calcular la ruta en línea.";
-      } finally {
-        locate.disabled = false; locate.innerHTML = `<i class="bi bi-crosshair"></i> USAR MI UBICACIÓN`;
+
+  function haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  async function renderRoute(userCoords) {
+    if (userMarker) map.removeLayer(userMarker);
+    if (currentRouteLayer) map.removeLayer(currentRouteLayer);
+
+    const userIcon = L.divIcon({
+      className: "custom-div-icon",
+      html: `<div style="background:#58e0a0;color:#07110d;padding:4px 8px;border-radius:999px;font-weight:900;font-size:9px;box-shadow:0 0 14px rgba(88,224,160,.6)">TÚ</div>`,
+      iconSize: [35, 24],
+      iconAnchor: [17, 12]
+    });
+    userMarker = L.marker(userCoords, { icon: userIcon }).addTo(map);
+
+    let routeDrawn = false;
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const url = `https://router.project-osrm.org/route/v1/driving/${userCoords[1]},${userCoords[0]};${destination[1]},${destination[0]}?overview=full&geometries=geojson`;
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (response.ok) {
+        const data = await response.json();
+        const route = data.routes?.[0];
+        if (route && route.geometry && route.geometry.coordinates) {
+          const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+          currentRouteLayer = L.polyline(coords, { color: "#b9a7ff", weight: 5, opacity: 0.95 }).addTo(map);
+          map.fitBounds(currentRouteLayer.getBounds(), { padding: [40, 40] });
+          if (distanceEl) distanceEl.textContent = `${(route.distance / 1000).toFixed(1)} km`;
+          if (durationEl) durationEl.textContent = `${Math.max(1, Math.round(route.duration / 60))} min`;
+          if (status) status.textContent = "Ruta vial calculada y trazada exitosamente hacia FluxGuard.";
+          routeDrawn = true;
+        }
       }
-    }, () => {
-      locate.disabled = false; locate.innerHTML = `<i class="bi bi-crosshair"></i> USAR MI UBICACIÓN`;
-      if (status) status.textContent = "No se concedió permiso para usar tu ubicación.";
-    }, { enableHighAccuracy: true, timeout: 10000 });
+    } catch (_) {
+      routeDrawn = false;
+    }
+
+    if (!routeDrawn) {
+      // Fallback confiable: Trazo directo + cálculo Haversine
+      const dist = haversineKm(userCoords[0], userCoords[1], destination[0], destination[1]);
+      const roadKm = +(dist * 1.25).toFixed(1);
+      const roadMin = Math.max(2, Math.round(roadKm * 1.15));
+
+      currentRouteLayer = L.polyline([userCoords, destination], {
+        color: "#b9a7ff",
+        weight: 5,
+        opacity: 0.95,
+        dashArray: "8, 10"
+      }).addTo(map);
+
+      map.fitBounds(currentRouteLayer.getBounds(), { padding: [45, 45] });
+      if (distanceEl) distanceEl.textContent = `${roadKm} km`;
+      if (durationEl) durationEl.textContent = `${roadMin} min`;
+      if (status) status.textContent = "Ruta directa trazada correctamente hacia FluxGuard (Mixquiahuala).";
+    }
+  }
+
+  document.getElementById("btn-reset-map")?.addEventListener("click", () => {
+    if (currentRouteLayer) {
+      map.removeLayer(currentRouteLayer);
+      currentRouteLayer = null;
+    }
+    if (userMarker) {
+      map.removeLayer(userMarker);
+      userMarker = null;
+    }
+    map.setView(destination, 14);
+    if (status) status.textContent = "Vista del mapa restablecida en FluxGuard.";
+    if (distanceEl) distanceEl.textContent = "-- km";
+    if (durationEl) durationEl.textContent = "-- min";
+  });
+
+  locate?.addEventListener("click", () => {
+    locate.disabled = true;
+    locate.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> CALCULANDO...`;
+    if (status) status.textContent = "Obteniendo ubicación y calculando trazo...";
+
+    if (!navigator.geolocation) {
+      locate.disabled = false;
+      locate.innerHTML = `<i class="bi bi-crosshair"></i> USAR MI UBICACIÓN`;
+      renderRoute([20.11697, -98.73329]); // Demo Pachuca
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async position => {
+        const user = [position.coords.latitude, position.coords.longitude];
+        await renderRoute(user);
+        locate.disabled = false;
+        locate.innerHTML = `<i class="bi bi-crosshair"></i> USAR MI UBICACIÓN`;
+      },
+      async () => {
+        if (status) status.textContent = "Sin acceso a GPS local. Trazando ruta demostrativa desde Pachuca...";
+        await renderRoute([20.11697, -98.73329]);
+        locate.disabled = false;
+        locate.innerHTML = `<i class="bi bi-crosshair"></i> USAR MI UBICACIÓN`;
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
   });
 }
 
@@ -361,6 +446,8 @@ function initAuthForms() {
     } else if (solicitar === "plan" || plan) {
       const planNombre = plan ? plan.toUpperCase() : "SELECCIONADO";
       showAlert(alertBox, "info", `<strong>Plan ${planNombre}:</strong> Inicia sesión para continuar al pago y activación de tu suscripción. ¿No tienes cuenta? <a href='crear-cuenta.html?solicitar=plan&plan=${plan || "standard"}&redirect=${encodeURIComponent(redirect || `pago.html?plan=${plan || "standard"}`)}' class='text-white text-decoration-underline fw-bold'>Crea tu cuenta aquí</a>.`);
+    }
+
     const createLink = document.querySelector(".login-register a[href*='crear-cuenta']");
     if (createLink) {
       const queryStr = window.location.search;
@@ -545,7 +632,7 @@ function initAuthForms() {
           throw new Error(backendError);
         }
 
-        // Guardar en la base de datos de usuarios registrados
+        // Guardar en la base de datos de usuarios registrados local
         const newUser = {
           nombre: get("reg-nombre"),
           apellido: get("reg-apellido"),
@@ -556,13 +643,27 @@ function initAuthForms() {
         registrados.push(newUser);
         localStorage.setItem("fluxg_usuarios", JSON.stringify(registrados));
 
-        const nextParams = new URLSearchParams();
-        nextParams.set("creada", "1");
-        if (solicitar) nextParams.set("solicitar", solicitar);
-        if (plan) nextParams.set("plan", plan);
-        if (redirect) nextParams.set("redirect", redirect);
+        // INICIAR SESIÓN DIRECTAMENTE COMO USUARIO
+        const activeUser = {
+          nombre: newUser.nombre,
+          apellido: newUser.apellido,
+          correo: newUser.email
+        };
+        localStorage.setItem("usuario", JSON.stringify(activeUser));
 
-        window.location.href = "login.html?" + nextParams.toString();
+        showAlert(alertBox, "success", `¡Cuenta creada exitosamente! Bienvenido, ${escapeHtml(activeUser.nombre)}. Iniciando sesión...`);
+
+        setTimeout(() => {
+          if (redirect) {
+            window.location.href = decodeURIComponent(redirect);
+          } else if (solicitar === "prototipo" || plan === "prototipo") {
+            window.location.href = "pago.html?plan=prototipo";
+          } else if (solicitar === "plan" && plan) {
+            window.location.href = `pago.html?plan=${plan}`;
+          } else {
+            window.location.href = "index.html";
+          }
+        }, 1000);
       } catch (error) {
         showAlert(alertBox, "danger", error.message || "No se pudo conectar con el servidor.");
       } finally {
@@ -573,15 +674,31 @@ function initAuthForms() {
       }
     });
   }
+}
 
-  // Toggle visibilidad de contraseña
-  document.querySelectorAll(".password-toggle-btn").forEach(button => button.addEventListener("click", () => {
-    const input = document.getElementById(button.dataset.target);
-    const icon = button.querySelector("i");
+function initPasswordToggles() {
+  document.addEventListener("click", event => {
+    const btn = event.target.closest(".password-toggle-btn");
+    if (!btn) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const targetId = btn.getAttribute("data-target");
+    if (!targetId) return;
+    const input = document.getElementById(targetId);
     if (!input) return;
-    input.type = input.type === "password" ? "text" : "password";
-    if (icon) icon.className = input.type === "password" ? "bi bi-eye" : "bi bi-eye-slash";
-  }));
+    const icon = btn.querySelector("i");
+    if (input.type === "password") {
+      input.type = "text";
+      if (icon) {
+        icon.className = "bi bi-eye-slash";
+      }
+    } else {
+      input.type = "password";
+      if (icon) {
+        icon.className = "bi bi-eye";
+      }
+    }
+  });
 }
 
 function initPlanes() {

@@ -135,16 +135,31 @@ section:not(.hero) { position:relative; padding:100px 0; }
 .hero h1 {
   max-width: 580px;
   margin: 0 0 18px;
+  padding: 0;
   font-family: "Barlow Condensed", sans-serif !important;
   font-size: clamp(54px, 6.2vw, 96px);
   font-weight: 900;
-  line-height: 0.86;
+  line-height: 0.72 !important;
   letter-spacing: -0.035em;
   text-transform: uppercase;
   color: #ffffff !important;
 }
-.hero h1 > span { display:block; color:#ffffff !important; }
-.hero h1 .accent-line { color:var(--gold) !important; font-style:italic; }
+
+.hero h1 > span {
+  display: block;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: #ffffff !important;
+  line-height: 0.72 !important;
+}
+
+.hero h1 .accent-line {
+  margin: 0 !important;
+  padding: 0 !important;
+  color: var(--gold) !important;
+  font-style: italic;
+  line-height: 0.72 !important;
+}
 .hero-description { max-width:480px; margin:0 0 28px; color:#ffffff !important; font-size:16px; font-weight:500; line-height:1.75; text-shadow:0 2px 6px rgba(0,0,0,0.9); }
 .hero-buttons { display:flex; gap:12px; }
 .hero-primary,.hero-secondary { display:inline-flex; align-items:center; gap:10px; padding:12px 22px; text-decoration:none; text-transform:uppercase; font-size:11px; font-weight:800; letter-spacing:.1em; border-radius:3px; transition:.25s ease; }
@@ -361,7 +376,12 @@ section:not(.hero) { position:relative; padding:100px 0; }
   }
   .hero h1 {
     font-size: clamp(40px, 12vw, 64px) !important;
-    line-height: 0.9 !important;
+    line-height: 0.72 !important;
+  }
+
+  .hero h1 > span,
+  .hero h1 .accent-line {
+    line-height: 0.72 !important;
   }
   .hero-buttons {
     flex-direction: column !important;

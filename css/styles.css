@@ -1446,288 +1446,243 @@ select {
 }
 
 
-/*------------------------------------------------------/*
+/* ===== BOTÓN FLOTANTE DE WHATSAPP ===== */
+
+.whatsapp-float {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1000;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #25d366;
+  color: #ffffff;
+  font-size: 30px;
+  border-radius: 50%;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+  text-decoration: none;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.whatsapp-float:hover,
+.whatsapp-float:focus-visible {
+  background-color: #1ebe5b;
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+@media (max-width: 576px) {
+  .whatsapp-float {
+    right: 16px;
+    bottom: 16px;
+    width: 54px;
+    height: 54px;
+    font-size: 26px;
+  }
+}
+
 
 /* =========================================================
-   FLUXGUARD - MISIÓN Y VISIÓN
+   MISIÓN Y VISIÓN
    ========================================================= */
 
-.about-content{
-  display:flex;
-  flex-direction:column;
-  gap:30px;
+.about-intro-box {
+  position: relative;
+  padding: 28px;
+  border: 1px solid rgba(185, 167, 255, 0.2);
+  background: linear-gradient(
+    145deg,
+    rgba(23, 17, 39, 0.92),
+    rgba(10, 7, 20, 0.65)
+  );
 }
 
-
-/* ================= INTRODUCCIÓN ================= */
-
-.about-intro-box{
-  position:relative;
-  padding:24px 28px;
-  margin-bottom:5px;
-
-  background:rgba(10,7,20,.35);
-
-  border:1px solid rgba(185,167,255,.22);
-  border-left:3px solid #b9a7ff;
-
-  box-shadow:0 15px 40px rgba(0,0,0,.12);
+.mission-vision {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 30px;
 }
-
-.about-intro-box::after{
-  content:"";
-  position:absolute;
-  right:0;
-  top:0;
-  width:45px;
-  height:45px;
-
-  border-top:1px solid rgba(185,167,255,.45);
-  border-right:1px solid rgba(185,167,255,.45);
-}
-
-.about-intro-box .section-eyebrow{
-  display:flex;
-  align-items:center;
-  gap:8px;
-
-  color:#b9a7ff;
-  font-size:9px;
-  font-weight:800;
-  letter-spacing:.18em;
-}
-
-.about-intro{
-  color:#ffffff !important;
-  font-size:16px;
-  font-weight:400;
-  line-height:1.75;
-
-  margin:13px 0 0;
-  max-width:700px;
-}
-
-.about-intro strong{
-  color:#b9a7ff;
-  font-weight:800;
-}
-
-
-/* ================= MISIÓN / VISIÓN ================= */
-
-.mission-vision{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:18px;
-}
-
-
-/* ================= TARJETAS ================= */
 
 .mission-block,
-.vision-block{
-  position:relative;
-
-  padding:25px;
-
-  min-height:280px;
-
+.vision-block {
+  position: relative;
+  min-height: 220px;
+  padding: 28px;
+  overflow: hidden;
+  border: 1px solid rgba(185, 167, 255, 0.2);
   background:
     linear-gradient(
       145deg,
-      rgba(185,167,255,.09),
-      rgba(10,7,20,.35)
+      rgba(185, 167, 255, 0.08),
+      rgba(10, 7, 20, 0.35)
     );
-
-  border:1px solid rgba(255,255,255,.10);
-
-  overflow:hidden;
-
   transition:
-    transform .3s ease,
-    border-color .3s ease,
-    background .3s ease;
-}
-
-
-/* Línea superior */
-
-.mission-block::before,
-.vision-block::before{
-  content:"";
-
-  position:absolute;
-  top:0;
-  left:0;
-
-  width:100%;
-  height:2px;
-
-  background:#b9a7ff;
+    transform 0.3s ease,
+    border-color 0.3s ease,
+    background 0.3s ease;
 }
 
 
 /* Círculo decorativo */
 
 .mission-block::after,
-.vision-block::after{
-  content:"";
+.vision-block::after {
+  content: "";
 
-  position:absolute;
+  position: absolute;
 
-  width:130px;
-  height:130px;
+  width: 130px;
+  height: 130px;
 
-  right:-70px;
-  bottom:-70px;
+  right: -70px;
+  bottom: -70px;
 
-  border-radius:50%;
+  border-radius: 50%;
 
-  background:rgba(185,167,255,.08);
+  background: rgba(185, 167, 255, 0.08);
 
-  filter:blur(4px);
+  filter: blur(4px);
 }
 
 
 /* Efecto hover */
 
 .mission-block:hover,
-.vision-block:hover{
-  transform:translateY(-4px);
+.vision-block:hover {
+  transform: translateY(-4px);
 
-  border-color:rgba(185,167,255,.38);
+  border-color: rgba(185, 167, 255, 0.38);
 
   background:
     linear-gradient(
       145deg,
-      rgba(185,167,255,.13),
-      rgba(10,7,20,.45)
+      rgba(185, 167, 255, 0.13),
+      rgba(10, 7, 20, 0.45)
     );
 }
 
 
 /* ================= ENCABEZADO ================= */
 
-.mv-header{
-  display:flex;
-  align-items:center;
+.mv-header {
+  display: flex;
+  align-items: center;
 
-  gap:14px;
+  gap: 14px;
 
-  margin-bottom:20px;
+  margin-bottom: 20px;
 }
 
+.mv-icon {
+  width: 45px;
+  height: 45px;
 
-.mv-icon{
-  width:45px;
-  height:45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  background: rgba(185, 167, 255, 0.10);
 
-  background:rgba(185,167,255,.10);
+  border: 1px solid rgba(185, 167, 255, 0.35);
 
-  border:1px solid rgba(185,167,255,.35);
+  color: #b9a7ff;
 
-  color:#b9a7ff;
-
-  font-size:20px;
+  font-size: 20px;
 }
 
+.mv-number {
+  display: block;
 
-.mv-number{
-  display:block;
+  margin-bottom: 2px;
 
-  margin-bottom:2px;
+  color: rgba(255, 255, 255, 0.32);
 
-  color:rgba(255,255,255,.32);
+  font-size: 8px;
+  font-weight: 800;
 
-  font-size:8px;
-  font-weight:800;
-
-  letter-spacing:.18em;
+  letter-spacing: 0.18em;
 }
 
+.mv-header h3 {
+  margin: 0;
 
-.mv-header h3{
-  margin:0;
+  color: #fff;
 
-  color:#fff;
+  font-family: "Barlow Condensed", sans-serif;
 
-  font-family:"Barlow Condensed",sans-serif;
+  font-size: 23px;
+  font-weight: 900;
 
-  font-size:23px;
-  font-weight:900;
-
-  letter-spacing:.08em;
+  letter-spacing: 0.08em;
 }
 
 
 /* ================= TEXTO ================= */
 
 .mission-block p,
-.vision-block p{
-  position:relative;
-  z-index:2;
+.vision-block p {
+  position: relative;
+  z-index: 2;
 
-  margin:0;
+  margin: 0;
 
-  color:rgba(255,255,255,.70);
+  color: rgba(255, 255, 255, 0.70);
 
-  font-size:13px;
-  line-height:1.75;
+  font-size: 13px;
+  line-height: 1.75;
 }
 
-
 .mission-block p strong,
-.vision-block p strong{
-  color:#fff;
+.vision-block p strong {
+  color: #fff;
 
-  font-weight:800;
+  font-weight: 800;
 }
 
 
 /* ================= RESPONSIVE ================= */
 
-@media(max-width:900px){
+@media (max-width: 900px) {
 
-  .mission-vision{
-    grid-template-columns:1fr;
+  .mission-vision {
+    grid-template-columns: 1fr;
   }
 
   .mission-block,
-  .vision-block{
-    min-height:auto;
+  .vision-block {
+    min-height: auto;
   }
 
 }
 
+@media (max-width: 700px) {
 
-@media(max-width:700px){
-
-  .about-intro-box{
-    padding:20px;
+  .about-intro-box {
+    padding: 20px;
   }
 
-  .about-intro{
-    font-size:14px;
-    line-height:1.7;
+  .about-intro {
+    font-size: 14px;
+    line-height: 1.7;
   }
 
   .mission-block,
-  .vision-block{
-    padding:20px;
+  .vision-block {
+    padding: 20px;
   }
 
-  .mv-header h3{
-    font-size:20px;
+  .mv-header h3 {
+    font-size: 20px;
   }
 
   .mission-block p,
-  .vision-block p{
-    font-size:13px;
-    line-height:1.7;
+  .vision-block p {
+    font-size: 13px;
+    line-height: 1.7;
   }
 
 }
